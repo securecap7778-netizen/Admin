@@ -1,1 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Admin Panel · Khichi Ittihad Pakistan</title>
+<link rel="icon" href="https://i.ibb.co/67BKfCHD/Screenshot-20260722-231112.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+:root{
+  --emerald:#0B4F3C;--emerald-dark:#073226;--emerald-soft:#0E5F48;
+  --gold:#C89B3C;--gold-soft:#E4C877;--paper:#FAF7F0;--sand:#EFE8D8;
+  --sand-dark:#E2D8C2;--ink:#1B2420;--ink-soft:#5B6660;--brick:#B5462F;
+  --line:#DCD3BD;--radius:14px;--shadow:0 8px 24px -12px rgba(11,79,60,.22);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--emerald-dark);font-family:'Inter',sans-serif;color:var(--ink);-webkit-tap-highlight-color:transparent;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+.app{max-width:520px;margin:0 auto;min-height:100vh;background:var(--paper);display:flex;flex-direction:column;position:relative;box-shadow:0 0 60px rgba(0,0,0,.35);}
 
+/* LOGIN */
+.login-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:linear-gradient(160deg,var(--emerald-dark) 0%,var(--emerald) 100%);}
+.login-box{width:100%;max-width:360px;background:var(--paper);border-radius:18px;padding:28px 22px;box-shadow:0 20px 50px rgba(0,0,0,.3);}
+.login-logo{width:64px;height:64px;border-radius:14px;object-fit:cover;border:2px solid var(--gold);display:block;margin:0 auto 14px;}
+.login-title{font-family:'Amiri',serif;font-size:22px;font-weight:700;text-align:center;color:var(--emerald-dark);margin:0 0 4px;}
+.login-sub{text-align:center;font-size:12px;color:var(--ink-soft);margin:0 0 22px;}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.field span{font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.3px;}
+.field input,.field textarea,.field select{border:1.5px solid var(--line);border-radius:10px;padding:12px 13px;font-size:14px;font-family:'Inter',sans-serif;background:#fff;color:var(--ink);outline:none;width:100%;}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--emerald);}
+.btn-primary{width:100%;border:none;border-radius:12px;padding:14px;font-weight:700;font-size:14px;cursor:pointer;background:var(--emerald);color:#fff;display:flex;align-items:center;justify-content:center;}
+.btn-primary:active{transform:scale(.98);}
+.btn-primary.loading{opacity:.7;pointer-events:none;}
+.btn-secondary{width:100%;border:none;border-radius:12px;padding:12px;font-weight:700;font-size:13px;cursor:pointer;background:var(--emerald-dark);color:var(--gold-soft);margin-top:8px;}
+.btn-danger{background:var(--brick);color:#fff;border:none;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;}
+.btn-gold{background:var(--gold);color:var(--emerald-dark);border:none;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;}
+.btn-outline{background:transparent;border:1.5px solid var(--emerald);color:var(--emerald);border-radius:10px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;}
+.btn-copy{background:var(--sand);border:1px solid var(--line);color:var(--emerald-dark);border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;}
+
+/* HEADER */
+.topbar{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--emerald) 0%,var(--emerald-soft) 100%);color:#fff;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid var(--gold);}
+.brand{display:flex;align-items:center;gap:10px;}
+.menu-btn{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:0 6px 0 0;}
+.brand-logo{width:34px;height:34px;border-radius:9px;object-fit:cover;border:1.5px solid var(--gold-soft);}
+.brand-text{display:flex;flex-direction:column;line-height:1.15;}
+.brand-name{font-family:'Amiri',serif;font-weight:700;font-size:15px;}
+.brand-sub{font-size:10px;color:var(--gold-soft);letter-spacing:.3px;}
+.logout-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:11px;font-weight:600;padding:7px 11px;border-radius:999px;cursor:pointer;}
+
+/* SIDEBAR */
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:40;opacity:0;pointer-events:none;transition:.3s;}
+.sidebar-overlay.active{opacity:1;pointer-events:auto;}
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:270px;background:var(--paper);z-index:50;transform:translateX(-100%);transition:.3s;display:flex;flex-direction:column;box-shadow:5px 0 20px rgba(0,0,0,.2);}
+.sidebar.active{transform:translateX(0);}
+.sidebar-header{padding:16px 18px;background:var(--emerald-dark);color:var(--gold-soft);font-family:'Amiri',serif;font-size:18px;font-weight:700;border-bottom:3px solid var(--gold);}
+.sidebar-nav{display:flex;flex-direction:column;padding:6px 0;overflow-y:auto;flex:1;}
+.sidebar-link{padding:13px 18px;color:var(--ink);font-weight:600;text-decoration:none;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--line);font-size:13.5px;position:relative;}
+.sidebar-link:active,.sidebar-link.active{background:var(--sand);}
+.sidebar-section-title{padding:12px 18px 4px;font-size:10px;font-weight:800;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.5px;}
+.menu-badge{position:absolute;top:10px;right:14px;background:var(--brick);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding-bottom:30px;scrollbar-width:none;}
+.content::-webkit-scrollbar{display:none;}
+.tab-pane{display:none;padding:16px 14px 10px;animation:fadeIn .25s ease;}
+.tab-pane.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px;gap:8px;flex-wrap:wrap;}
+.section-head h2{font-family:'Amiri',serif;font-size:18px;margin:0;color:var(--emerald-dark);font-weight:700;}
+.section-note{font-size:11px;color:var(--ink-soft);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+.stat-card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px;text-align:center;box-shadow:var(--shadow);}
+.stat-card .num{font-size:20px;font-weight:800;color:var(--emerald);font-family:'IBM Plex Mono',monospace;}
+.stat-card .label{font-size:11px;color:var(--ink-soft);margin-top:3px;text-transform:uppercase;letter-spacing:.3px;}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);margin-bottom:11px;}
+.member-card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px;margin-bottom:10px;box-shadow:var(--shadow);position:relative;}
+.member-card.pinned{border:2px solid var(--gold);}
+.member-top{display:flex;align-items:center;gap:11px;}
+.member-avatar{width:48px;height:48px;border-radius:12px;flex-shrink:0;object-fit:cover;background:linear-gradient(135deg,var(--gold),var(--gold-soft));color:var(--emerald-dark);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;border:1px solid var(--line);overflow:hidden;}
+.member-avatar img{width:100%;height:100%;object-fit:cover;}
+.member-info{flex:1;min-width:0;}
+.member-name{font-weight:700;font-size:14.5px;}
+.member-role{font-size:11.5px;font-weight:600;color:var(--emerald);margin-top:2px;}
+.member-meta{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+.member-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.pin-badge{position:absolute;top:-8px;right:10px;background:var(--gold);color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:8px;}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;font-size:12.5px;}
+.detail-item{background:var(--sand);padding:8px 10px;border-radius:8px;}
+.detail-item.full{grid-column:1 / -1;}
+.detail-label{font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;margin-bottom:2px;}
+.detail-value{color:var(--ink);font-weight:500;word-break:break-word;}
+.search-box{width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:11px;font-size:14px;margin-bottom:12px;outline:none;background:#fff;}
+.search-box:focus{border-color:var(--emerald);}
+.ledger-item{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 12px;display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.ledger-avatar{width:34px;height:34px;border-radius:50%;background:var(--emerald);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+.ledger-main{flex:1;min-width:0;}
+.ledger-name{font-weight:700;font-size:13px;}
+.ledger-sub{font-size:11px;color:var(--ink-soft);margin-top:1px;}
+.ledger-amount{font-weight:700;font-size:13.5px;color:var(--emerald-dark);flex-shrink:0;}
+.ledger-thumb{width:36px;height:36px;border-radius:8px;object-fit:cover;border:1px solid var(--line);cursor:pointer;}
+.upload-box{border:1.5px dashed var(--gold);border-radius:10px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--emerald-dark);cursor:pointer;background:var(--sand);font-size:12.5px;font-weight:600;text-align:center;}
+.upload-box.has-file{border-style:solid;border-color:var(--emerald);}
+.upload-box img.preview{width:100%;max-height:120px;object-fit:cover;border-radius:8px;}
+.empty-state{text-align:center;padding:28px 12px;color:var(--ink-soft);font-size:13px;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--emerald-dark);color:#fff;padding:11px 18px;border-radius:999px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:all .3s;z-index:80;box-shadow:0 8px 20px rgba(0,0,0,.3);border:1px solid var(--gold);max-width:90%;text-align:center;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.error{border-color:var(--brick);}
+.modal-overlay{position:fixed;inset:0;background:rgba(7,50,38,.55);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;z-index:60;}
+.modal-overlay.open{opacity:1;pointer-events:auto;}
+.modal-sheet{width:100%;max-width:520px;max-height:92vh;background:var(--paper);border-radius:18px 18px 0 0;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);}
+.modal-overlay.open .modal-sheet{transform:translateY(0);}
+.modal-handle{width:36px;height:4px;background:var(--line);border-radius:4px;margin:9px auto 0;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--line);}
+.modal-header h3{margin:0;font-family:'Amiri',serif;font-size:17px;color:var(--emerald-dark);}
+.modal-close{background:none;border:none;font-size:22px;color:var(--ink-soft);cursor:pointer;}
+.modal-body{padding:14px 16px 24px;overflow-y:auto;}
+.img-viewer{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;z-index:90;padding:16px;}
+.img-viewer.open{opacity:1;pointer-events:auto;}
+.img-viewer img{max-width:100%;max-height:100%;border-radius:10px;}
+
+/* SERVER OFF - disable buttons */
+body.server-off .btn-primary,
+body.server-off .btn-gold:not(.btn-paynow),
+body.server-off .btn-outline,
+body.server-off .btn-danger,
+body.server-off .btn-secondary,
+body.server-off form button{opacity:.45!important;pointer-events:none!important;filter:grayscale(.6);}
+body.server-off .btn-paynow,
+body.server-off .btn-copy{opacity:1!important;pointer-events:auto!important;filter:none!important;}
+.server-warning{background:#fff3cd;border:1px solid #ffc107;color:#856404;padding:12px 14px;border-radius:12px;margin-bottom:14px;font-size:13px;line-height:1.5;display:none;}
+body.server-off .server-warning{display:block;}
+
+/* PDF (hidden) */
+#pdfContainer{position:absolute;left:-9999px;top:0;width:210mm;background:#fff;font-family:Arial,sans-serif;color:#111;}
+.pdf-page{width:190mm;min-height:270mm;padding:12mm 10mm;box-sizing:border-box;page-break-after:always;}
+.pdf-page:last-child{page-break-after:auto;}
+.pdf-header{text-align:center;margin-bottom:18px;border-bottom:2px solid #0B4F3C;padding-bottom:10px;}
+.pdf-title{font-size:18px;font-weight:700;color:#0B4F3C;margin:0 0 4px;}
+.pdf-sub{font-size:11px;color:#666;margin:0;}
+.pdf-name{font-size:16px;font-weight:700;color:#0B4F3C;margin:0 0 12px;border-bottom:1px solid #ddd;padding-bottom:6px;}
+.pdf-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;font-size:12px;line-height:1.55;}
+.pdf-item b{color:#0B4F3C;}
+.pdf-full{grid-column:1/-1;}
+
+.action-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;background:var(--sand);color:var(--emerald-dark);}
+.badge.pinned{background:var(--gold);color:#fff;}
+.server-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow);}
+.server-status-on{color:#0E5F48;font-weight:700;}
+.server-status-off{color:var(--brick);font-weight:700;}
+.server-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px;}
+.server-row:last-child{border-bottom:none;}
+.server-label{color:var(--ink-soft);font-weight:600;}
+.server-value{font-weight:700;color:var(--emerald-dark);text-align:right;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <img src="https://i.ibb.co/67BKfCHD/Screenshot-20260722-231112.png" class="login-logo" alt="logo">
+    <h1 class="login-title">Admin Panel</h1>
+    <p class="login-sub">Khichi Ittihad Pakistan · Foundation · Admin 1</p>
+    <form id="adminLoginForm">
+      <div class="field"><span>Admin Password</span><input type="password" id="adminPass" placeholder="Enter admin password" required autofocus></div>
+      <button type="submit" class="btn-primary" id="adminLoginBtn"><span class="btn-label">Login to Admin</span></button>
+    </form>
+    <p style="text-align:center;font-size:11px;color:var(--ink-soft);margin-top:16px;">Default password: <strong>123</strong></p>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="mainApp" style="display:none;">
+  <header class="topbar">
+    <div class="brand">
+      <button class="menu-btn" onclick="toggleSidebar()">&#9776;</button>
+      <img src="https://i.ibb.co/67BKfCHD/Screenshot-20260722-231112.png" class="brand-logo" alt="logo">
+      <div class="brand-text"><span class="brand-name">Admin Panel</span><span class="brand-sub">Khichi Ittihad · Admin 1</span></div>
+    </div>
+    <button class="logout-btn" onclick="adminLogout()">Logout</button>
+  </header>
+
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">Admin Menu</div>
+    <div class="sidebar-nav">
+      <div class="sidebar-section-title">Core Modules</div>
+      <a href="#" class="sidebar-link active" data-tab="tab-dashboard" onclick="switchTab('tab-dashboard');toggleSidebar();">📊 Dashboard</a>
+      <a href="#" class="sidebar-link" data-tab="tab-members" onclick="switchTab('tab-members');toggleSidebar();">👥 All Members</a>
+      <a href="#" class="sidebar-link" data-tab="tab-announcements" onclick="switchTab('tab-announcements');toggleSidebar();">📢 Announcements</a>
+      <div class="sidebar-section-title">Donations & Ledger</div>
+      <a href="#" class="sidebar-link" data-tab="tab-online" onclick="switchTab('tab-online');toggleSidebar();">💚 Online Donations</a>
+      <a href="#" class="sidebar-link" data-tab="tab-offline" onclick="switchTab('tab-offline');toggleSidebar();">💵 Offline Donations</a>
+      <a href="#" class="sidebar-link" data-tab="tab-usage" onclick="switchTab('tab-usage');toggleSidebar();">📉 Donation Usage</a>
+      <a href="#" class="sidebar-link" data-tab="tab-accounts" onclick="switchTab('tab-accounts');toggleSidebar();">🏦 Digital Accounts</a>
+      <div class="sidebar-section-title">Community & Support</div>
+      <a href="#" class="sidebar-link" data-tab="tab-family" onclick="switchTab('tab-family');toggleSidebar();">👨‍👩‍👧‍👦 Family Posts</a>
+      <a href="#" class="sidebar-link" data-tab="tab-requests" onclick="switchTab('tab-requests');toggleSidebar();">🔄 Profile Requests</a>
+      <a href="#" class="sidebar-link" data-tab="tab-suggestions" onclick="switchTab('tab-suggestions');toggleSidebar();">💡 App Suggestions</a>
+      <a href="#" class="sidebar-link" data-tab="tab-reports" onclick="switchTab('tab-reports');toggleSidebar();">⚠️ Spam / Reports</a>
+      <div class="sidebar-section-title">Server & Billing</div>
+      <a href="#" class="sidebar-link" data-tab="tab-server" onclick="switchTab('tab-server');toggleSidebar();">
+        🖥️ Server Bills & Usage
+        <span class="menu-badge" id="serverNewBadge" style="display:none;">NEW</span>
+      </a>
+    </div>
+  </div>
+
+  <main class="content" id="content">
+    <div class="server-warning" id="serverWarning">
+      ⚠️ <strong>Server is currently OFF</strong> (Automatically ).<br>
+      All actions are temporarily disabled. Please pay the bill or contact Developer.
+    </div>
+
+    <!-- DASHBOARD -->
+    <section class="tab-pane active" id="tab-dashboard">
+      <div class="section-head"><h2>Dashboard</h2><span class="section-note">Overview</span></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="num mono" id="dashMembers">—</div><div class="label">Total Members</div></div>
+        <div class="stat-card"><div class="num mono" id="dashOnline">—</div><div class="label">Online Donations</div></div>
+        <div class="stat-card"><div class="num mono" id="dashOffline">—</div><div class="label">Offline Donations</div></div>
+        <div class="stat-card"><div class="num mono" id="dashUsage">—</div><div class="label">Total Usage</div></div>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 8px;font-size:14px;color:var(--emerald);">Quick Actions</h3>
+        <div class="action-bar">
+          <button class="btn-gold" onclick="switchTab('tab-members')">View Members</button>
+          <button class="btn-outline" onclick="switchTab('tab-announcements')">Post Announcement</button>
+          <button class="btn-outline" onclick="switchTab('tab-requests')">Check Requests</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- MEMBERS -->
+    <section class="tab-pane" id="tab-members">
+      <div class="section-head"><h2>All Members</h2><span class="section-note" id="memberCount">0 members</span></div>
+      <div class="action-bar">
+        <button class="btn-gold" id="exportPdfBtn" onclick="exportMembersPDF()">📄 Export All to PDF</button>
+        <button class="btn-outline" onclick="loadMembers()">↻ Refresh</button>
+      </div>
+      <input type="text" class="search-box" id="memberSearch" placeholder="Search by name, CNIC, phone, city..." oninput="filterMembers()">
+      <div id="membersList"><div class="empty-state">Loading members...</div></div>
+    </section>
+
+    <!-- ANNOUNCEMENTS -->
+    <section class="tab-pane" id="tab-announcements">
+      <div class="section-head"><h2>Announcements</h2><span class="section-note">Post official updates</span></div>
+      <form class="card" id="announcementForm">
+        <div class="field"><span>Title</span><input type="text" id="annTitle" placeholder="Announcement title" required></div>
+        <div class="field"><span>Description</span><textarea id="annDesc" placeholder="Full message..." required rows="4"></textarea></div>
+        <button type="submit" class="btn-primary" id="annSubmitBtn"><span class="btn-label">Post Announcement</span></button>
+      </form>
+      <div id="announcementList"></div>
+    </section>
+
+    <!-- ONLINE -->
+    <section class="tab-pane" id="tab-online">
+      <div class="section-head"><h2>Online Donations</h2><span class="section-note">Submitted by users</span></div>
+      <div class="action-bar"><button class="btn-outline" onclick="loadOnlineDonations()">↻ Refresh</button></div>
+      <div id="onlineList"></div>
+    </section>
+
+    <!-- OFFLINE -->
+    <section class="tab-pane" id="tab-offline">
+      <div class="section-head"><h2>Offline / Physical Donations</h2><span class="section-note">Add cash received</span></div>
+      <form class="card" id="offlineForm">
+        <div class="field"><span>Donor Name</span><input type="text" id="offName" placeholder="Full name" required></div>
+        <div class="field"><span>Amount (Rs.)</span><input type="number" id="offAmount" placeholder="Amount" min="1" required></div>
+        <div class="field"><span>Description / Notes</span><input type="text" id="offDesc" placeholder="Optional note"></div>
+        <button type="submit" class="btn-primary" id="offSubmitBtn"><span class="btn-label">Add Offline Donation</span></button>
+      </form>
+      <div id="offlineList"></div>
+    </section>
+
+    <!-- USAGE -->
+    <section class="tab-pane" id="tab-usage">
+      <div class="section-head"><h2>Donation Usage / Expenses</h2><span class="section-note">Record where money was spent</span></div>
+      <form class="card" id="usageForm">
+        <div class="field"><span>Title</span><input type="text" id="useTitle" placeholder="e.g. Medical Camp – Multan" required></div>
+        <div class="field"><span>Amount (Rs.)</span><input type="number" id="useAmount" placeholder="Amount spent" min="1" required></div>
+        <div class="field"><span>Description</span><textarea id="useDesc" placeholder="Details of expense" rows="2"></textarea></div>
+        <div class="field"><span>Proof Image (optional)</span>
+          <div class="upload-box" id="useUploadBox"><span id="useUploadText">Upload proof photo</span></div>
+          <input type="file" id="useFileInput" accept="image/*" hidden>
+        </div>
+        <button type="submit" class="btn-primary" id="useSubmitBtn"><span class="btn-label">Add Expense Record</span></button>
+      </form>
+      <div id="usageList"></div>
+    </section>
+
+    <!-- ACCOUNTS -->
+    <section class="tab-pane" id="tab-accounts">
+      <div class="section-head"><h2>Digital Accounts</h2><span class="section-note">Update JazzCash / Easypaisa / Bank</span></div>
+      <form class="card" id="accountsForm">
+        <h4 style="margin:0 0 10px;color:var(--emerald);font-size:14px;">JazzCash</h4>
+        <div class="field"><span>Title</span><input type="text" id="accJazzTitle" placeholder="JazzCash Account"></div>
+        <div class="field"><span>Number</span><input type="text" id="accJazzNumber" placeholder="03xx-xxxxxxx"></div>
+        <div class="field"><span>Description</span><input type="text" id="accJazzDesc" placeholder="Optional"></div>
+        <h4 style="margin:16px 0 10px;color:var(--emerald);font-size:14px;">Easypaisa</h4>
+        <div class="field"><span>Title</span><input type="text" id="accEasyTitle" placeholder="Easypaisa Account"></div>
+        <div class="field"><span>Number</span><input type="text" id="accEasyNumber" placeholder="03xx-xxxxxxx"></div>
+        <div class="field"><span>Description</span><input type="text" id="accEasyDesc" placeholder="Optional"></div>
+        <h4 style="margin:16px 0 10px;color:var(--emerald);font-size:14px;">Bank Account</h4>
+        <div class="field"><span>Title</span><input type="text" id="accBankTitle" placeholder="Bank Name"></div>
+        <div class="field"><span>Account Number / IBAN</span><input type="text" id="accBankNumber" placeholder="Account number"></div>
+        <div class="field"><span>Description</span><input type="text" id="accBankDesc" placeholder="Account title etc."></div>
+        <button type="submit" class="btn-primary" id="accSubmitBtn" style="margin-top:12px;"><span class="btn-label">Save All Accounts</span></button>
+      </form>
+    </section>
+
+    <!-- FAMILY -->
+    <section class="tab-pane" id="tab-family">
+      <div class="section-head"><h2>Our Family Posts</h2><span class="section-note">Community feed posts</span></div>
+      <div class="action-bar"><button class="btn-outline" onclick="loadFamilyPosts()">↻ Refresh</button></div>
+      <div id="familyList"></div>
+    </section>
+
+    <!-- REQUESTS -->
+    <section class="tab-pane" id="tab-requests">
+      <div class="section-head"><h2>Profile Change Requests</h2><span class="section-note">Approve Phone/CNIC updates</span></div>
+      <div class="action-bar"><button class="btn-outline" onclick="loadRequests()">↻ Refresh</button></div>
+      <div id="requestsList"></div>
+    </section>
+
+    <!-- SUGGESTIONS -->
+    <section class="tab-pane" id="tab-suggestions">
+      <div class="section-head"><h2>App Suggestions</h2><span class="section-note">Suggestions submitted by users</span></div>
+      <div class="action-bar"><button class="btn-outline" onclick="loadSuggestions()">↻ Refresh</button></div>
+      <div id="suggestionsList"></div>
+    </section>
+
+    <!-- REPORTS -->
+    <section class="tab-pane" id="tab-reports">
+      <div class="section-head"><h2>Reported Posts</h2><span class="section-note">Action required on Community Posts</span></div>
+      <div class="action-bar"><button class="btn-outline" onclick="loadReports()">↻ Refresh</button></div>
+      <div id="reportsList"></div>
+    </section>
+
+    <!-- SERVER BILLS -->
+    <section class="tab-pane" id="tab-server">
+      <div class="section-head"><h2>Server Bills & Usage</h2><span class="section-note">Controlled MrCrazy Ai</span></div>
+      <div class="server-card" id="serverInfoCard">
+        <div style="text-align:center;margin-bottom:14px;">
+          <div style="font-size:13px;color:var(--ink-soft);margin-bottom:4px;">Current Server Status</div>
+          <div id="serverStatusText" class="server-status-on" style="font-size:20px;">● ONLINE</div>
+        </div>
+        <div class="server-row"><span class="server-label">Server Usage</span><span class="server-value" id="serverUsage">—</span></div>
+        <div class="server-row"><span class="server-label">Bill Amount</span><span class="server-value" id="serverBill">—</span></div>
+        <div class="server-row"><span class="server-label">Bill Date</span><span class="server-value" id="serverDate">—</span></div>
+        <div class="server-row">
+          <span class="server-label">Project ID</span>
+          <span class="server-value" style="display:flex;align-items:center;gap:8px;">
+            <span id="serverProjectId" class="mono">—</span>
+            <button class="btn-copy" onclick="copyProjectId()">Copy</button>
+          </span>
+        </div>
+      </div>
+      <button class="btn-gold btn-paynow" id="payNowBtn" style="width:100%;padding:14px;font-size:15px;margin-top:6px;" onclick="openPayNow()">💳 Pay Now</button>
+      <div class="card" style="margin-top:16px;background:var(--sand);">
+        <p style="font-size:12.5px;line-height:1.55;margin:0;color:var(--ink-soft);">
+          <strong>Note:</strong> Server Fee Disclaimer:
+Yeh bill sirf Server Usage Statistics / Hosting Charges ko cover karne ke liye hai jo Google Cloud/Services ko pay kiye jaate hain. Aap ke ta'awun ka shukriya!<strong></strong> MUHAMMAD NAEEM
+        </p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- MEMBER MODAL -->
+<div class="modal-overlay" id="memberModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header"><h3>Member Full Details</h3><button class="modal-close" onclick="closeMemberModal()">&times;</button></div>
+    <div class="modal-body" id="memberModalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="img-viewer" id="imgViewer"><img src="" id="imgViewerSrc" alt="proof"></div>
+<div id="pdfContainer"></div>
+
+<script>
+const FIREBASE_URL = "https://website-f1e6f-default-rtdb.firebaseio.com";
+const CLOUD_NAME = "sjt8mlws";
+const UPLOAD_PRESET = "Naeem786";
+const ADMIN_PASSWORD = "123";
+const PAY_NOW_URL = "https://mrcrazyteamofficial-lab.github.io/Custmer/";
+
+let allMembers = [];
+let serverStatus = { status: "on" };
+
+const $ = (id) => document.getElementById(id);
+
+function showToast(msg, isError){
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.toggle("error", !!isError);
+  t.classList.add("show");
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => t.classList.remove("show"), 3200);
+}
+
+function setLoading(btn, isLoading, loadingText, defaultText){
+  btn.classList.toggle("loading", isLoading);
+  btn.disabled = isLoading;
+  const label = btn.querySelector(".btn-label");
+  if(label) label.textContent = isLoading ? loadingText : defaultText;
+}
+
+function initials(name){
+  if(!name) return "?";
+  const p = name.trim().split(/\s+/);
+  return (p[0][0] + (p[1] ? p[1][0] : "")).toUpperCase();
+}
+
+function timeAgo(ts){
+  if(!ts) return "—";
+  const d = Math.floor((Date.now() - ts) / 1000);
+  if(d < 60) return "just now";
+  if(d < 3600) return Math.floor(d / 60) + " min ago";
+  if(d < 86400) return Math.floor(d / 3600) + " hrs ago";
+  return Math.floor(d / 86400) + " days ago";
+}
+
+function escapeHtml(str){
+  return String(str ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function formatDate(d){
+  if(!d) return "—";
+  try { return new Date(d).toLocaleDateString("en-PK"); } catch(e){ return d; }
+}
+
+async function dbGet(path){
+  const res = await fetch(`${FIREBASE_URL}/${path}.json`);
+  if(!res.ok) throw new Error("Read failed");
+  return res.json();
+}
+async function dbPush(path, data){
+  const res = await fetch(`${FIREBASE_URL}/${path}.json`, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(data) });
+  if(!res.ok) throw new Error("Write failed");
+  return res.json();
+}
+async function dbSet(path, data){
+  const res = await fetch(`${FIREBASE_URL}/${path}.json`, { method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify(data) });
+  return res.json();
+}
+async function dbUpdate(path, data){
+  const res = await fetch(`${FIREBASE_URL}/${path}.json`, { method:"PATCH", headers:{"Content-Type":"application/json"}, body:JSON.stringify(data) });
+  return res.json();
+}
+async function dbDelete(path){
+  await fetch(`${FIREBASE_URL}/${path}.json`, { method:"DELETE" });
+}
+async function uploadToCloudinary(file){
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("upload_preset", UPLOAD_PRESET);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method:"POST", body:fd });
+  const r = await res.json();
+  if(!r.secure_url) throw new Error("Upload failed");
+  return r.secure_url;
+}
+
+/* AUTH */
+function checkAdminSession(){
+  if(sessionStorage.getItem("kip_admin") === "1"){
+    $("loginScreen").style.display = "none";
+    $("mainApp").style.display = "flex";
+    initAdmin();
+  }
+}
+$("adminLoginForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  if($("adminPass").value === ADMIN_PASSWORD){
+    sessionStorage.setItem("kip_admin", "1");
+    $("loginScreen").style.display = "none";
+    $("mainApp").style.display = "flex";
+    showToast("Welcome Admin 1!");
+    initAdmin();
+  } else {
+    showToast("Wrong password", true);
+  }
+});
+function adminLogout(){
+  sessionStorage.removeItem("kip_admin");
+  location.reload();
+}
+
+/* NAV */
+function toggleSidebar(){
+  $("sidebar").classList.toggle("active");
+  $("sidebarOverlay").classList.toggle("active");
+}
+function switchTab(tabId){
+  document.querySelectorAll(".tab-pane").forEach(p => p.classList.toggle("active", p.id === tabId));
+  document.querySelectorAll(".sidebar-link").forEach(l => l.classList.toggle("active", l.dataset.tab === tabId));
+  $("content").scrollTo({ top:0, behavior:"smooth" });
+  if(tabId === "tab-members") loadMembers();
+  if(tabId === "tab-announcements") loadAnnouncements();
+  if(tabId === "tab-online") loadOnlineDonations();
+  if(tabId === "tab-offline") loadOfflineDonations();
+  if(tabId === "tab-usage") loadUsage();
+  if(tabId === "tab-accounts") loadAccountsForm();
+  if(tabId === "tab-family") loadFamilyPosts();
+  if(tabId === "tab-requests") loadRequests();
+  if(tabId === "tab-suggestions") loadSuggestions();
+  if(tabId === "tab-reports") loadReports();
+  if(tabId === "tab-server"){
+    loadServerStatus();
+    $("serverNewBadge").style.display = "none";
+    localStorage.setItem("kip_server_seen", Date.now());
+  }
+}
+
+/* SERVER STATUS */
+async function loadServerStatus(){
+  try {
+    const data = await dbGet("server_control");
+    serverStatus = data || { status: "on", usage: "—", bill: "—", date: "—", projectId: "—" };
+  } catch(e){
+    serverStatus = { status: "on" };
+  }
+  applyServerStatus();
+}
+function applyServerStatus(){
+  const isOff = (serverStatus.status || "on").toLowerCase() === "off";
+  document.body.classList.toggle("server-off", isOff);
+
+  const statusEl = $("serverStatusText");
+  if(statusEl){
+    statusEl.textContent = isOff ? "● OFFLINE" : "● ONLINE";
+    statusEl.className = isOff ? "server-status-off" : "server-status-on";
+  }
+  if($("serverUsage")) $("serverUsage").textContent = serverStatus.usage || "—";
+  if($("serverBill")) $("serverBill").textContent = serverStatus.bill ? ("Rs " + Number(serverStatus.bill).toLocaleString()) : "—";
+  if($("serverDate")) $("serverDate").textContent = serverStatus.date || "—";
+  if($("serverProjectId")) $("serverProjectId").textContent = serverStatus.projectId || "—";
+
+  const badge = $("serverNewBadge");
+  if(isOff){
+    const lastSeen = Number(localStorage.getItem("kip_server_seen") || 0);
+    if((serverStatus.updatedAt || 0) > lastSeen) badge.style.display = "flex";
+  } else {
+    badge.style.display = "none";
+  }
+}
+function copyProjectId(){
+  const id = $("serverProjectId").textContent;
+  if(!id || id === "—"){ showToast("No Project ID", true); return; }
+  navigator.clipboard.writeText(id).then(() => showToast("Project ID copied!")).catch(() => showToast("Copy failed", true));
+}
+function openPayNow(){ window.open(PAY_NOW_URL, "_blank"); }
+
+/* DASHBOARD */
+async function loadDashboard(){
+  try {
+    const [members, online, offline, usage] = await Promise.all([
+      dbGet("members"), dbGet("donations_online"), dbGet("donations_offline"), dbGet("donation_usage")
+    ]);
+    $("dashMembers").textContent = Object.keys(members || {}).length;
+    $("dashOnline").textContent = "Rs " + Object.values(online || {}).reduce((s,d) => s + Number(d.amount||0), 0).toLocaleString();
+    $("dashOffline").textContent = "Rs " + Object.values(offline || {}).reduce((s,d) => s + Number(d.amount||0), 0).toLocaleString();
+    $("dashUsage").textContent = "Rs " + Object.values(usage || {}).reduce((s,d) => s + Number(d.amount||0), 0).toLocaleString();
+  } catch(e){ $("dashMembers").textContent = "—"; }
+}
+
+/* MEMBERS */
+async function loadMembers(){
+  const list = $("membersList");
+  list.innerHTML = `<div class="empty-state">Loading...</div>`;
+  try {
+    const data = await dbGet("members");
+    allMembers = Object.entries(data || {}).map(([id, val]) => ({ id, ...val }))
+      .sort((a,b) => {
+        if(a.pinned === b.pinned) return (b.timestamp||0) - (a.timestamp||0);
+        return a.pinned ? -1 : 1;
+      });
+    $("memberCount").textContent = allMembers.length + " members";
+    renderMembers(allMembers);
+  } catch(e){
+    list.innerHTML = `<div class="empty-state">Failed to load members.</div>`;
+  }
+}
+function renderMembers(arr){
+  const list = $("membersList");
+  if(!arr.length){ list.innerHTML = `<div class="empty-state">No members found.</div>`; return; }
+  list.innerHTML = arr.map(m => `
+    <div class="member-card ${m.pinned ? 'pinned' : ''}">
+      ${m.pinned ? '<div class="pin-badge">📌 Pinned</div>' : ''}
+      <div class="member-top">
+        <div class="member-avatar">${m.avatarUrl ? `<img src="${escapeHtml(m.avatarUrl)}">` : escapeHtml(initials(m.name))}</div>
+        <div class="member-info">
+          <div class="member-name">${escapeHtml(m.name || "—")}</div>
+          <div class="member-role">${escapeHtml(m.category || "General Member")}</div>
+          <div class="member-meta">${escapeHtml(m.phone || "")} · ${escapeHtml(timeAgo(m.timestamp))}</div>
+        </div>
+      </div>
+      <div class="member-actions">
+        <button class="btn-outline" onclick="viewMember('${m.id}')">View Full Details</button>
+        <button class="btn-outline" onclick="togglePin('${m.id}', ${!!m.pinned})">${m.pinned ? "Unpin" : "Pin"}</button>
+        <button class="btn-danger" onclick="deleteMember('${m.id}', '${escapeHtml(m.name)}')">Delete</button>
+      </div>
+    </div>
+  `).join("");
+}
+function filterMembers(){
+  const q = $("memberSearch").value.toLowerCase().trim();
+  if(!q){ renderMembers(allMembers); return; }
+  const filtered = allMembers.filter(m => {
+    const str = [m.name, m.cnic, m.phone, m.whatsapp, m.email, m.currentAddress, m.category, m.fatherName, m.tehsil].join(" ").toLowerCase();
+    return str.includes(q);
+  });
+  renderMembers(filtered);
+}
+function viewMember(id){
+  const m = allMembers.find(x => x.id === id);
+  if(!m) return;
+  $("memberModalBody").innerHTML = `
+    <div style="text-align:center;margin-bottom:14px;">
+      <div class="member-avatar" style="width:72px;height:72px;margin:0 auto;font-size:24px;">
+        ${m.avatarUrl ? `<img src="${escapeHtml(m.avatarUrl)}">` : escapeHtml(initials(m.name))}
+      </div>
+      <h3 style="margin:10px 0 2px;font-size:18px;">${escapeHtml(m.name)}</h3>
+      <div class="badge ${m.pinned?'pinned':''}">${escapeHtml(m.category || "General Member")}</div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-item"><div class="detail-label">Father / Husband</div><div class="detail-value">${escapeHtml(m.fatherName || "—")}</div></div>
+      <div class="detail-item"><div class="detail-label">Date of Birth</div><div class="detail-value">${escapeHtml(formatDate(m.dob))}</div></div>
+      <div class="detail-item"><div class="detail-label">Gender</div><div class="detail-value">${escapeHtml(m.gender || "—")}</div></div>
+      <div class="detail-item"><div class="detail-label">CNIC</div><div class="detail-value mono">${escapeHtml(m.cnic || "—")}</div></div>
+      <div class="detail-item"><div class="detail-label">Passport</div><div class="detail-value">${escapeHtml(m.passport || "—")}</div></div>
+      <div class="detail-item"><div class="detail-label">Mobile</div><div class="detail-value">${escapeHtml(m.phone || "—")}</div></div>
+      <div class="detail-item"><div class="detail-label">WhatsApp</div><div class="detail-value">${escapeHtml(m.whatsapp || "—")}</div></div>
+      <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">${escapeHtml(m.email || "—")}</div></div>
+      <div class="detail-item"><div class="detail-label">Marital Status</div><div class="detail-value">${escapeHtml(m.maritalStatus || "—")}</div></div>
+      <div class="detail-item"><div class="detail-label">Tehsil</div><div class="detail-value">${escapeHtml(m.tehsil || "—")}</div></div>
+      <div class="detail-item full"><div class="detail-label">Current Address</div><div class="detail-value">${escapeHtml(m.currentAddress || "—")}</div></div>
+      <div class="detail-item full"><div class="detail-label">Permanent Address</div><div class="detail-value">${escapeHtml(m.permanentAddress || "—")}</div></div>
+      <div class="detail-item"><div class="detail-label">Qualification</div><div class="detail-value">${escapeHtml(m.qualification || "—")}</div></div>
+      <div class="detail-item"><div class="detail-label">Profession</div><div class="detail-value">${escapeHtml(m.profession || "—")}</div></div>
+      <div class="detail-item full"><div class="detail-label">Organization</div><div class="detail-value">${escapeHtml(m.organization || "—")}</div></div>
+      <div class="detail-item"><div class="detail-label">Membership Type</div><div class="detail-value">${escapeHtml(m.membershipType || "—")}</div></div>
+      <div class="detail-item"><div class="detail-label">Joined</div><div class="detail-value">${escapeHtml(timeAgo(m.timestamp))}</div></div>
+      <div class="detail-item full" style="background:#fff3cd;border:1px solid #ffc107;">
+        <div class="detail-label">Password (Admin Only)</div>
+        <div class="detail-value mono" style="font-size:14px;font-weight:700;">${escapeHtml(m.password || "—")}</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px;">
+      <button class="btn-outline" style="flex:1;" onclick="togglePin('${m.id}', ${!!m.pinned});closeMemberModal();">${m.pinned ? "Unpin" : "Pin Member"}</button>
+      <button class="btn-danger" style="flex:1;" onclick="deleteMember('${m.id}', '${escapeHtml(m.name)}');closeMemberModal();">Delete</button>
+    </div>
+  `;
+  $("memberModal").classList.add("open");
+}
+function closeMemberModal(){ $("memberModal").classList.remove("open"); }
+async function togglePin(id, currentlyPinned){
+  try {
+    await dbSet(`members/${id}/pinned`, !currentlyPinned);
+    showToast(currentlyPinned ? "Member unpinned" : "Member pinned");
+    loadMembers();
+  } catch(e){ showToast("Failed", true); }
+}
+async function deleteMember(id, name){
+  if(!confirm(`Delete member "${name}" permanently?`)) return;
+  try {
+    await dbDelete(`members/${id}`);
+    showToast("Member deleted");
+    loadMembers();
+    loadDashboard();
+  } catch(e){ showToast("Delete failed", true); }
+}
+
+/* PDF EXPORT - 1 user per page */
+function exportMembersPDF(){
+  if(!allMembers.length){ showToast("No members to export", true); return; }
+  const btn = $("exportPdfBtn");
+  btn.disabled = true;
+  btn.textContent = "⏳ Generating PDF...";
+  showToast("PDF generate ho raha hai, thoda wait karein...");
+
+  setTimeout(() => {
+    try {
+      const container = $("pdfContainer");
+      const now = new Date().toLocaleString("en-PK");
+      let html = "";
+      allMembers.forEach((m, i) => {
+        html += `
+          <div class="pdf-page">
+            <div class="pdf-header">
+              <div class="pdf-title">Khichi Ittihad Pakistan – Member Record</div>
+              <div class="pdf-sub">Generated: ${now} · Member ${i+1} of ${allMembers.length}</div>
+            </div>
+            <div class="pdf-name">${i+1}. ${escapeHtml(m.name || "—")} ${m.pinned ? "(Pinned)" : ""}</div>
+            <div class="pdf-grid">
+              <div class="pdf-item"><b>Category:</b> ${escapeHtml(m.category || "—")}</div>
+              <div class="pdf-item"><b>Father/Husband:</b> ${escapeHtml(m.fatherName || "—")}</div>
+              <div class="pdf-item"><b>Date of Birth:</b> ${escapeHtml(formatDate(m.dob))}</div>
+              <div class="pdf-item"><b>Gender:</b> ${escapeHtml(m.gender || "—")}</div>
+              <div class="pdf-item"><b>CNIC:</b> ${escapeHtml(m.cnic || "—")}</div>
+              <div class="pdf-item"><b>Mobile:</b> ${escapeHtml(m.phone || "—")}</div>
+              <div class="pdf-item"><b>WhatsApp:</b> ${escapeHtml(m.whatsapp || "—")}</div>
+              <div class="pdf-item"><b>Email:</b> ${escapeHtml(m.email || "—")}</div>
+              <div class="pdf-item"><b>Tehsil:</b> ${escapeHtml(m.tehsil || "—")}</div>
+              <div class="pdf-item"><b>Marital Status:</b> ${escapeHtml(m.maritalStatus || "—")}</div>
+              <div class="pdf-item"><b>Qualification:</b> ${escapeHtml(m.qualification || "—")}</div>
+              <div class="pdf-item"><b>Profession:</b> ${escapeHtml(m.profession || "—")}</div>
+              <div class="pdf-item pdf-full"><b>Current Address:</b> ${escapeHtml(m.currentAddress || "—")}</div>
+              <div class="pdf-item pdf-full"><b>Permanent Address:</b> ${escapeHtml(m.permanentAddress || "—")}</div>
+              <div class="pdf-item pdf-full"><b>Organization:</b> ${escapeHtml(m.organization || "—")}</div>
+              <div class="pdf-item"><b>Membership Type:</b> ${escapeHtml(m.membershipType || "—")}</div>
+              <div class="pdf-item"><b>Joined:</b> ${escapeHtml(timeAgo(m.timestamp))}</div>
+              <div class="pdf-item pdf-full" style="background:#fff8e1;padding:6px;border-radius:4px;"><b>Password:</b> ${escapeHtml(m.password || "—")}</div>
+            </div>
+          </div>`;
+      });
+      container.innerHTML = html;
+      const opt = {
+        margin: 0,
+        filename: `Khichi-Ittihad-Members-${Date.now()}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak: { mode: ["css", "legacy"] }
+      };
+      html2pdf().set(opt).from(container).save().then(() => {
+        showToast("PDF downloaded successfully!");
+        container.innerHTML = "";
+        btn.disabled = false;
+        btn.textContent = "📄 Export All to PDF";
+      }).catch(err => {
+        console.error(err);
+        showToast("PDF generation failed", true);
+        btn.disabled = false;
+        btn.textContent = "📄 Export All to PDF";
+      });
+    } catch(err){
+      console.error(err);
+      showToast("PDF generation failed", true);
+      btn.disabled = false;
+      btn.textContent = "📄 Export All to PDF";
+    }
+  }, 300);
+}
+
+/* ANNOUNCEMENTS */
+$("announcementForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = $("annSubmitBtn");
+  setLoading(btn, true, "Posting...", "Post Announcement");
+  try {
+    await dbPush("announcements", { title: $("annTitle").value.trim(), desc: $("annDesc").value.trim(), timestamp: Date.now(), likes: 0 });
+    showToast("Announcement posted!");
+    e.target.reset();
+    loadAnnouncements();
+  } catch(err){ showToast("Failed to post", true); }
+  finally { setLoading(btn, false, "", "Post Announcement"); }
+});
+async function loadAnnouncements(){
+  const list = $("announcementList");
+  try {
+    const data = await dbGet("announcements");
+    const entries = Object.entries(data || {}).map(([id,v]) => ({id,...v})).sort((a,b) => b.timestamp - a.timestamp);
+    if(!entries.length){ list.innerHTML = `<div class="empty-state">No announcements yet.</div>`; return; }
+    list.innerHTML = entries.map(a => `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div style="font-weight:700;font-size:14px;color:var(--emerald);">${escapeHtml(a.title)}</div>
+            <div style="font-size:11px;color:var(--ink-soft);margin:3px 0 6px;">${timeAgo(a.timestamp)} · ♥ ${a.likes||0}</div>
+            <div style="font-size:13px;line-height:1.45;">${escapeHtml(a.desc)}</div>
+          </div>
+          <button class="btn-danger" onclick="deleteAnnouncement('${a.id}')">Delete</button>
+        </div>
+      </div>`).join("");
+  } catch(e){ list.innerHTML = `<div class="empty-state">Load failed.</div>`; }
+}
+async function deleteAnnouncement(id){
+  if(!confirm("Delete this announcement?")) return;
+  try { await dbDelete(`announcements/${id}`); showToast("Deleted"); loadAnnouncements(); }
+  catch(e){ showToast("Failed", true); }
+}
+
+/* ONLINE */
+async function loadOnlineDonations(){
+  const list = $("onlineList");
+  try {
+    const data = await dbGet("donations_online");
+    const entries = Object.entries(data || {}).map(([id,v]) => ({id,...v})).sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+    if(!entries.length){ list.innerHTML = `<div class="empty-state">No online donations yet.</div>`; return; }
+    list.innerHTML = entries.map(d => `
+      <div class="ledger-item">
+        <div class="ledger-avatar">${escapeHtml(initials(d.name))}</div>
+        <div class="ledger-main"><div class="ledger-name">${escapeHtml(d.name)}</div><div class="ledger-sub">${timeAgo(d.timestamp)}</div></div>
+        <div class="ledger-amount mono">Rs ${Number(d.amount||0).toLocaleString()}</div>
+        ${d.screenshotUrl ? `<img class="ledger-thumb" src="${escapeHtml(d.screenshotUrl)}" onclick="openImg('${escapeHtml(d.screenshotUrl)}')">` : ""}
+        <button class="btn-danger" style="padding:6px 8px;font-size:11px;" onclick="deleteOnline('${d.id}')">✕</button>
+      </div>`).join("");
+  } catch(e){ list.innerHTML = `<div class="empty-state">Load failed.</div>`; }
+}
+async function deleteOnline(id){
+  if(!confirm("Delete this donation record?")) return;
+  try { await dbDelete(`donations_online/${id}`); showToast("Deleted"); loadOnlineDonations(); loadDashboard(); }
+  catch(e){ showToast("Failed", true); }
+}
+
+/* OFFLINE */
+$("offlineForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = $("offSubmitBtn");
+  setLoading(btn, true, "Saving...", "Add Offline Donation");
+  try {
+    await dbPush("donations_offline", { name: $("offName").value.trim(), amount: Number($("offAmount").value), description: $("offDesc").value.trim(), timestamp: Date.now() });
+    showToast("Offline donation added");
+    e.target.reset();
+    loadOfflineDonations();
+    loadDashboard();
+  } catch(err){ showToast("Failed", true); }
+  finally { setLoading(btn, false, "", "Add Offline Donation"); }
+});
+async function loadOfflineDonations(){
+  const list = $("offlineList");
+  try {
+    const data = await dbGet("donations_offline");
+    const entries = Object.entries(data || {}).map(([id,v]) => ({id,...v})).sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+    if(!entries.length){ list.innerHTML = `<div class="empty-state">No offline records yet.</div>`; return; }
+    list.innerHTML = entries.map(d => `
+      <div class="ledger-item">
+        <div class="ledger-avatar">${escapeHtml(initials(d.name))}</div>
+        <div class="ledger-main"><div class="ledger-name">${escapeHtml(d.name)}</div><div class="ledger-sub">${escapeHtml(d.description || "Cash")} · ${timeAgo(d.timestamp)}</div></div>
+        <div class="ledger-amount mono">Rs ${Number(d.amount||0).toLocaleString()}</div>
+        <button class="btn-danger" style="padding:6px 8px;font-size:11px;" onclick="deleteOffline('${d.id}')">✕</button>
+      </div>`).join("");
+  } catch(e){ list.innerHTML = `<div class="empty-state">Load failed.</div>`; }
+}
+async function deleteOffline(id){
+  if(!confirm("Delete this record?")) return;
+  try { await dbDelete(`donations_offline/${id}`); showToast("Deleted"); loadOfflineDonations(); loadDashboard(); }
+  catch(e){ showToast("Failed", true); }
+}
+
+/* USAGE */
+wireUploadBox("useUploadBox", "useFileInput", "useUploadText");
+$("usageForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = $("useSubmitBtn");
+  setLoading(btn, true, "Saving...", "Add Expense Record");
+  let proofUrl = "";
+  const file = $("useFileInput").files[0];
+  if(file){
+    try { proofUrl = await uploadToCloudinary(file); }
+    catch(err){ showToast("Image upload failed", true); setLoading(btn, false, "", "Add Expense Record"); return; }
+  }
+  try {
+    await dbPush("donation_usage", { title: $("useTitle").value.trim(), amount: Number($("useAmount").value), description: $("useDesc").value.trim(), proofUrl, timestamp: Date.now() });
+    showToast("Expense recorded");
+    e.target.reset();
+    $("useUploadBox").classList.remove("has-file");
+    $("useUploadBox").querySelector("img.preview")?.remove();
+    $("useUploadText").textContent = "Upload proof photo";
+    loadUsage();
+    loadDashboard();
+  } catch(err){ showToast("Failed", true); }
+  finally { setLoading(btn, false, "", "Add Expense Record"); }
+});
+async function loadUsage(){
+  const list = $("usageList");
+  try {
+    const data = await dbGet("donation_usage");
+    const entries = Object.entries(data || {}).map(([id,v]) => ({id,...v})).sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+    if(!entries.length){ list.innerHTML = `<div class="empty-state">No expense records yet.</div>`; return; }
+    list.innerHTML = entries.map(d => `
+      <div class="ledger-item">
+        <div class="ledger-avatar" style="background:var(--brick)">${escapeHtml(initials(d.title))}</div>
+        <div class="ledger-main"><div class="ledger-name">${escapeHtml(d.title)}</div><div class="ledger-sub">${escapeHtml(d.description || "")} · ${timeAgo(d.timestamp)}</div></div>
+        <div class="ledger-amount mono">Rs ${Number(d.amount||0).toLocaleString()}</div>
+        ${d.proofUrl ? `<img class="ledger-thumb" src="${escapeHtml(d.proofUrl)}" onclick="openImg('${escapeHtml(d.proofUrl)}')">` : ""}
+        <button class="btn-danger" style="padding:6px 8px;font-size:11px;" onclick="deleteUsage('${d.id}')">✕</button>
+      </div>`).join("");
+  } catch(e){ list.innerHTML = `<div class="empty-state">Load failed.</div>`; }
+}
+async function deleteUsage(id){
+  if(!confirm("Delete this expense?")) return;
+  try { await dbDelete(`donation_usage/${id}`); showToast("Deleted"); loadUsage(); loadDashboard(); }
+  catch(e){ showToast("Failed", true); }
+}
+
+/* ACCOUNTS */
+async function loadAccountsForm(){
+  try {
+    const data = (await dbGet("accounts")) || {};
+    $("accJazzTitle").value = data.jazzcash?.title || "";
+    $("accJazzNumber").value = data.jazzcash?.number || "";
+    $("accJazzDesc").value = data.jazzcash?.description || "";
+    $("accEasyTitle").value = data.easypaisa?.title || "";
+    $("accEasyNumber").value = data.easypaisa?.number || "";
+    $("accEasyDesc").value = data.easypaisa?.description || "";
+    $("accBankTitle").value = data.bank?.title || "";
+    $("accBankNumber").value = data.bank?.number || "";
+    $("accBankDesc").value = data.bank?.description || "";
+  } catch(e){}
+}
+$("accountsForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = $("accSubmitBtn");
+  setLoading(btn, true, "Saving...", "Save All Accounts");
+  try {
+    await dbSet("accounts", {
+      jazzcash: { title: $("accJazzTitle").value.trim(), number: $("accJazzNumber").value.trim(), description: $("accJazzDesc").value.trim() },
+      easypaisa: { title: $("accEasyTitle").value.trim(), number: $("accEasyNumber").value.trim(), description: $("accEasyDesc").value.trim() },
+      bank: { title: $("accBankTitle").value.trim(), number: $("accBankNumber").value.trim(), description: $("accBankDesc").value.trim() }
+    });
+    showToast("Accounts updated successfully");
+  } catch(err){ showToast("Failed to save", true); }
+  finally { setLoading(btn, false, "", "Save All Accounts"); }
+});
+
+/* FAMILY */
+async function loadFamilyPosts(){
+  const list = $("familyList");
+  try {
+    const data = await dbGet("family_posts");
+    const entries = Object.entries(data || {}).map(([id,v]) => ({id,...v})).sort((a,b) => b.timestamp - a.timestamp);
+    if(!entries.length){ list.innerHTML = `<div class="empty-state">No family posts yet.</div>`; return; }
+    list.innerHTML = entries.map(p => `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div style="font-weight:700;font-size:13.5px;">${escapeHtml(p.name)}</div>
+            <div style="font-size:11px;color:var(--ink-soft);margin:2px 0 6px;">${timeAgo(p.timestamp)} · ♥ ${p.likes||0}</div>
+            <div style="font-size:13px;line-height:1.45;">${escapeHtml(p.text)}</div>
+          </div>
+          <button class="btn-danger" onclick="deleteFamily('${p.id}')">Delete</button>
+        </div>
+      </div>`).join("");
+  } catch(e){ list.innerHTML = `<div class="empty-state">Load failed.</div>`; }
+}
+async function deleteFamily(id, silent){
+  if(!silent && !confirm("Delete this post?")) return;
+  try { await dbDelete(`family_posts/${id}`); showToast("Post deleted"); loadFamilyPosts(); }
+  catch(e){ showToast("Failed", true); }
+}
+
+/* REQUESTS */
+function loadRequests(){
+  const list = $("requestsList");
+  const reqs = allMembers.filter(m => m.pendingChange);
+  if(!reqs.length){ list.innerHTML = `<div class="empty-state">No pending requests at the moment.</div>`; return; }
+  list.innerHTML = reqs.map(m => `
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:4px;color:var(--emerald-dark);">${escapeHtml(m.name)}</div>
+      <div style="font-size:12.5px;color:var(--ink);margin-bottom:10px;line-height:1.5;">
+        <span style="color:var(--ink-soft);font-size:11px;">CURRENT DATA:</span><br>
+        <strong>Phone:</strong> ${escapeHtml(m.phone)} &nbsp;|&nbsp; <strong>CNIC:</strong> ${escapeHtml(m.cnic)}<br><br>
+        <span style="color:var(--gold);font-size:11px;font-weight:800;">REQUESTED UPDATE:</span><br>
+        <strong>${escapeHtml(m.pendingChange.value)}</strong>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-primary" style="padding:8px;font-size:12px;flex:1;" onclick="approveRequest('${m.id}', '${escapeHtml(m.pendingChange.value)}')">Approve</button>
+        <button class="btn-danger" style="padding:8px;font-size:12px;flex:1;" onclick="rejectRequest('${m.id}')">Reject</button>
+      </div>
+    </div>`).join("");
+}
+async function approveRequest(id, valStr){
+  if(!confirm("Approve and apply these changes?")) return;
+  const phoneMatch = valStr.match(/Phone:\s*([^|]+)/);
+  const cnicMatch = valStr.match(/CNIC:\s*(.+)/);
+  const newPhone = phoneMatch ? phoneMatch[1].trim() : "";
+  const newCnic = cnicMatch ? cnicMatch[1].trim() : "";
+  try {
+    const updatePayload = { pendingChange: null };
+    if(newPhone) updatePayload.phone = newPhone;
+    if(newCnic) updatePayload.cnic = newCnic;
+    await dbUpdate(`members/${id}`, updatePayload);
+    showToast("Request Approved & Profile Updated");
+    await loadMembers();
+  } catch(e){ showToast("Failed to approve", true); }
+}
+async function rejectRequest(id){
+  if(!confirm("Reject this update request?")) return;
+  try {
+    await dbUpdate(`members/${id}`, { pendingChange: null });
+    showToast("Request Rejected");
+    await loadMembers();
+  } catch(e){ showToast("Failed to reject", true); }
+}
+
+/* SUGGESTIONS */
+async function loadSuggestions(){
+  const list = $("suggestionsList");
+  try {
+    const data = await dbGet("app_suggestions");
+    const entries = Object.entries(data || {}).map(([id,v]) => ({id,...v})).sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+    if(!entries.length){ list.innerHTML = `<div class="empty-state">No app suggestions yet.</div>`; return; }
+    list.innerHTML = entries.map(s => `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <div style="flex:1;">
+            <div style="font-weight:700;color:var(--emerald);">${escapeHtml(s.name)}</div>
+            <div style="font-size:11px;color:var(--ink-soft);margin-bottom:6px;">${escapeHtml(s.phone)} · ${timeAgo(s.timestamp)}</div>
+            <div style="font-size:13px;line-height:1.5;">${escapeHtml(s.details)}</div>
+          </div>
+          ${s.screenshotUrl ? `<img src="${escapeHtml(s.screenshotUrl)}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid var(--line);" onclick="openImg('${escapeHtml(s.screenshotUrl)}')">` : ""}
+        </div>
+        <div style="margin-top:12px;display:flex;justify-content:flex-end;">
+          <button class="btn-danger" style="padding:6px 12px;font-size:12px;" onclick="deleteSuggestion('${s.id}')">Delete Suggestion</button>
+        </div>
+      </div>`).join("");
+  } catch(e){ list.innerHTML = `<div class="empty-state">Load failed.</div>`; }
+}
+async function deleteSuggestion(id){
+  if(!confirm("Delete this suggestion?")) return;
+  try { await dbDelete(`app_suggestions/${id}`); showToast("Suggestion deleted"); loadSuggestions(); }
+  catch(e){ showToast("Failed", true); }
+}
+
+/* REPORTS */
+async function loadReports(){
+  const list = $("reportsList");
+  try {
+    const data = await dbGet("reports");
+    const entries = Object.entries(data || {}).map(([id,v]) => ({id,...v})).sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+    if(!entries.length){ list.innerHTML = `<div class="empty-state">No reported posts. All good!</div>`; return; }
+    list.innerHTML = entries.map(r => `
+      <div class="card" style="border-left:4px solid var(--brick);">
+        <div style="font-weight:800;color:var(--brick);font-size:14px;margin-bottom:2px;">${escapeHtml(r.reason)}</div>
+        <div style="font-size:11px;color:var(--ink-soft);margin-bottom:8px;">Reported by: ${escapeHtml(r.reporterName)} · ${timeAgo(r.timestamp)}</div>
+        ${r.details ? `<div style="font-size:12.5px;background:var(--sand);padding:8px;border-radius:6px;margin-bottom:10px;"><em>"${escapeHtml(r.details)}"</em></div>` : ""}
+        <div style="font-size:11px;color:var(--emerald-soft);">Post ID: ${escapeHtml(r.postId)}</div>
+        <div style="margin-top:12px;display:flex;gap:8px;">
+          <button class="btn-primary" style="background:var(--brick);padding:8px;font-size:12px;flex:1;" onclick="deleteFamily('${r.postId}', true); deleteReport('${r.id}', true);">Delete Post & Report</button>
+          <button class="btn-outline" style="padding:8px;font-size:12px;flex:1;" onclick="deleteReport('${r.id}')">Dismiss Report</button>
+        </div>
+      </div>`).join("");
+  } catch(e){ list.innerHTML = `<div class="empty-state">Load failed.</div>`; }
+}
+async function deleteReport(id, silent){
+  if(!silent && !confirm("Dismiss this report?")) return;
+  try { await dbDelete(`reports/${id}`); if(!silent) showToast("Report dismissed"); loadReports(); }
+  catch(e){ if(!silent) showToast("Failed", true); }
+}
+
+/* IMAGE + UPLOAD */
+function openImg(src){
+  $("imgViewerSrc").src = src;
+  $("imgViewer").classList.add("open");
+}
+$("imgViewer").addEventListener("click", () => $("imgViewer").classList.remove("open"));
+function wireUploadBox(boxId, inputId, textId){
+  const box = $(boxId), input = $(inputId), textEl = $(textId);
+  if(!box || !input || !textEl) return;
+  box.addEventListener("click", () => input.click());
+  input.addEventListener("change", () => {
+    const file = input.files[0];
+    if(!file) return;
+    box.classList.add("has-file");
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      textEl.parentElement.querySelector("img.preview")?.remove();
+      const img = document.createElement("img");
+      img.src = e.target.result;
+      img.className = "preview";
+      box.prepend(img);
+    };
+    reader.readAsDataURL(file);
+    textEl.textContent = file.name.length > 24 ? file.name.slice(0,21)+"..." : file.name;
+  });
+}
+
+/* INIT */
+function initAdmin(){
+  loadDashboard();
+  loadMembers();
+  loadServerStatus();
+  setInterval(loadServerStatus, 60000);
+}
+checkAdminSession();
+</script>
+</body>
+        </html>
