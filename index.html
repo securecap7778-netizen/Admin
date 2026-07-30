@@ -212,7 +212,7 @@ body.server-off .server-warning{display:block;}
 
   <main class="content" id="content">
     <div class="server-warning" id="serverWarning">
-      ⚠️ <strong>Server is currently OFF</strong> (Automatically ).<br>
+      ⚠️ <strong>Server is currently OFF</strong> (set by automatic ).<br>
       All actions are temporarily disabled. Please pay the bill or contact Developer.
     </div>
 
@@ -252,6 +252,13 @@ body.server-off .server-warning{display:block;}
       <form class="card" id="announcementForm">
         <div class="field"><span>Title</span><input type="text" id="annTitle" placeholder="Announcement title" required></div>
         <div class="field"><span>Description</span><textarea id="annDesc" placeholder="Full message..." required rows="4"></textarea></div>
+        <div class="field">
+          <span>Attach Image (Optional)</span>
+          <div class="upload-box" id="annUploadBox" style="border:1.5px dashed var(--gold);border-radius:10px;padding:14px;text-align:center;cursor:pointer;background:var(--sand);font-size:12.5px;font-weight:600;">
+            <span id="annUploadText">Tap to upload image</span>
+          </div>
+          <input type="file" id="annFileInput" accept="image/*" hidden>
+        </div>
         <button type="submit" class="btn-primary" id="annSubmitBtn"><span class="btn-label">Post Announcement</span></button>
       </form>
       <div id="announcementList"></div>
@@ -326,6 +333,12 @@ body.server-off .server-warning{display:block;}
       <div id="requestsList"></div>
     </section>
 
+    <!-- SUGGESTIONS -->
+    <section class="tab-pane" id="tab-suggestions">
+      <div class="section-head"><h2>App Suggestions</h2><span class="section-note">Suggestions submitted by users</span></div>
+      <div class="action-bar"><button class="btn-outline" onclick="loadSuggestions()">↻ Refresh</button></div>
+      <div id="suggestionsList"></div>
+    </section>
 
     <!-- REPORTS -->
     <section class="tab-pane" id="tab-reports">
@@ -336,7 +349,7 @@ body.server-off .server-warning{display:block;}
 
     <!-- SERVER BILLS -->
     <section class="tab-pane" id="tab-server">
-      <div class="section-head"><h2>Server Bills & Usage</h2><span class="section-note">Controlled MrCrazy Ai</span></div>
+      <div class="section-head"><h2>Server Bills & Usage</h2><span class="section-note">Controlled by MrCrazy Ai</span></div>
       <div class="server-card" id="serverInfoCard">
         <div style="text-align:center;margin-bottom:14px;">
           <div style="font-size:13px;color:var(--ink-soft);margin-bottom:4px;">Current Server Status</div>
@@ -356,8 +369,7 @@ body.server-off .server-warning{display:block;}
       <button class="btn-gold btn-paynow" id="payNowBtn" style="width:100%;padding:14px;font-size:15px;margin-top:6px;" onclick="openPayNow()">💳 Pay Now</button>
       <div class="card" style="margin-top:16px;background:var(--sand);">
         <p style="font-size:12.5px;line-height:1.55;margin:0;color:var(--ink-soft);">
-          <strong>Note:</strong> Server Fee Disclaimer:
-Yeh bill sirf Server Usage Statistics / Hosting Charges ko cover karne ke liye hai jo Google Cloud/Services ko pay kiye jaate hain. Aap ke ta'awun ka shukriya!<strong></strong> MUHAMMAD NAEEM
+          <strong>Note:</strong> Server Fee Disclaimer: Yeh bill sirf Server Usage Statistics / Hosting Charges ko cover karne ke liye hai jo Google Cloud/Services ko pay kiye jaate hain. Aap ke ta'awun ka shukriya!<strong></strong> MUHAMMAD NAEEM.
         </p>
       </div>
     </section>
@@ -743,14 +755,32 @@ function exportMembersPDF(){
 }
 
 /* ANNOUNCEMENTS */
+wireUploadBox("annUploadBox", "annFileInput", "annUploadText");
+
 $("announcementForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const btn = $("annSubmitBtn");
   setLoading(btn, true, "Posting...", "Post Announcement");
   try {
-    await dbPush("announcements", { title: $("annTitle").value.trim(), desc: $("annDesc").value.trim(), timestamp: Date.now(), likes: 0 });
+    let imageUrl = "";
+    const file = $("annFileInput").files[0];
+    if(file){
+      setLoading(btn, true, "Uploading image...", "Post Announcement");
+      imageUrl = await uploadToCloudinary(file);
+    }
+    await dbPush("announcements", {
+      title: $("annTitle").value.trim(),
+      desc: $("annDesc").value.trim(),
+      imageUrl,
+      timestamp: Date.now(),
+      likes: 0,
+      likesMap: {}
+    });
     showToast("Announcement posted!");
     e.target.reset();
+    $("annUploadBox").classList.remove("has-file");
+    $("annUploadBox").querySelector("img.preview")?.remove();
+    $("annUploadText").textContent = "Tap to upload image";
     loadAnnouncements();
   } catch(err){ showToast("Failed to post", true); }
   finally { setLoading(btn, false, "", "Post Announcement"); }
@@ -761,17 +791,21 @@ async function loadAnnouncements(){
     const data = await dbGet("announcements");
     const entries = Object.entries(data || {}).map(([id,v]) => ({id,...v})).sort((a,b) => b.timestamp - a.timestamp);
     if(!entries.length){ list.innerHTML = `<div class="empty-state">No announcements yet.</div>`; return; }
-    list.innerHTML = entries.map(a => `
+    list.innerHTML = entries.map(a => {
+      const likeCount = a.likesMap ? Object.keys(a.likesMap).length : (a.likes||0);
+      return `
       <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-          <div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <div style="flex:1;min-width:0;">
             <div style="font-weight:700;font-size:14px;color:var(--emerald);">${escapeHtml(a.title)}</div>
-            <div style="font-size:11px;color:var(--ink-soft);margin:3px 0 6px;">${timeAgo(a.timestamp)} · ♥ ${a.likes||0}</div>
+            <div style="font-size:11px;color:var(--ink-soft);margin:3px 0 6px;">${timeAgo(a.timestamp)} · ♥ ${likeCount}</div>
             <div style="font-size:13px;line-height:1.45;">${escapeHtml(a.desc)}</div>
+            ${a.imageUrl?`<img src="${escapeHtml(a.imageUrl)}" style="max-width:100%;max-height:120px;border-radius:8px;margin-top:8px;object-fit:contain;background:var(--sand);" onclick="openImg('${escapeHtml(a.imageUrl)}')">`:""}
           </div>
           <button class="btn-danger" onclick="deleteAnnouncement('${a.id}')">Delete</button>
         </div>
-      </div>`).join("");
+      </div>`;
+    }).join("");
   } catch(e){ list.innerHTML = `<div class="empty-state">Load failed.</div>`; }
 }
 async function deleteAnnouncement(id){
