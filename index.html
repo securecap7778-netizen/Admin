@@ -130,6 +130,12 @@ body.server-off .btn-secondary,
 body.server-off form button{opacity:.45!important;pointer-events:none!important;filter:grayscale(.6);}
 body.server-off .btn-paynow,
 body.server-off .btn-copy{opacity:1!important;pointer-events:auto!important;filter:none!important;}
+body.server-off #installmentBox,
+body.server-off #installmentBox input,
+body.server-off #installmentBox select,
+body.server-off #installmentBox button{opacity:1!important;pointer-events:auto!important;filter:none!important;}
+body.server-off #tab-server .server-card,
+body.server-off #billAlertBox{opacity:1!important;pointer-events:auto!important;filter:none!important;}
 .server-warning{background:#fff3cd;border:1px solid #ffc107;color:#856404;padding:12px 14px;border-radius:12px;margin-bottom:14px;font-size:13px;line-height:1.5;display:none;}
 body.server-off .server-warning{display:block;}
 
@@ -155,6 +161,22 @@ body.server-off .server-warning{display:block;}
 .server-row:last-child{border-bottom:none;}
 .server-label{color:var(--ink-soft);font-weight:600;}
 .server-value{font-weight:700;color:var(--emerald-dark);text-align:right;}
+.loading-overlay{position:fixed;inset:0;background:rgba(7,50,38,.55);z-index:100;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
+.loading-overlay.show{display:flex;}
+.loading-box{background:var(--paper);border-radius:16px;padding:28px 32px;text-align:center;box-shadow:0 16px 40px rgba(0,0,0,.3);border:1px solid var(--gold);min-width:160px;}
+.loading-spinner{width:42px;height:42px;border:3px solid var(--sand);border-top-color:var(--emerald);border-radius:50%;margin:0 auto 12px;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-text{font-size:13px;font-weight:600;color:var(--emerald-dark);}
+.dev-footer{margin-top:28px;padding:18px 14px 24px;border-top:1px solid var(--line);text-align:center;}
+.dev-footer-btn{display:inline-flex;align-items:center;gap:8px;background:var(--emerald-dark);color:var(--gold-soft);border:none;border-radius:12px;padding:12px 16px;font-size:12.5px;font-weight:700;cursor:pointer;text-decoration:none;box-shadow:var(--shadow);}
+.dev-footer-btn:active{transform:scale(.98);}
+.policy-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:14px;box-shadow:var(--shadow);position:relative;}
+.policy-card h4{margin:0 0 10px;font-size:14px;color:var(--emerald-dark);font-family:'Amiri',serif;}
+.policy-card ul{margin:0;padding-left:18px;font-size:12.5px;line-height:1.65;color:var(--ink);}
+.policy-card li{margin-bottom:6px;}
+.dev-corner{position:absolute;bottom:14px;right:14px;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.dev-corner img{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);background:#fff;}
+.dev-corner span{font-size:9px;font-weight:700;color:var(--emerald-dark);text-align:center;max-width:72px;line-height:1.2;}
 </style>
 </head>
 <body>
@@ -169,7 +191,6 @@ body.server-off .server-warning{display:block;}
       <div class="field"><span>Admin Password</span><input type="password" id="adminPass" placeholder="Enter admin password" required autofocus></div>
       <button type="submit" class="btn-primary" id="adminLoginBtn"><span class="btn-label">Login to Admin</span></button>
     </form>
-    <p style="text-align:center;font-size:11px;color:var(--ink-soft);margin-top:16px;">Default password: <strong>123</strong></p>
   </div>
 </div>
 
@@ -199,21 +220,22 @@ body.server-off .server-warning{display:block;}
       <a href="#" class="sidebar-link" data-tab="tab-accounts" onclick="switchTab('tab-accounts');toggleSidebar();">🏦 Digital Accounts</a>
       <div class="sidebar-section-title">Community & Support</div>
       <a href="#" class="sidebar-link" data-tab="tab-family" onclick="switchTab('tab-family');toggleSidebar();">👨‍👩‍👧‍👦 Family Posts</a>
-      <a href="#" class="sidebar-link" data-tab="tab-requests" onclick="switchTab('tab-requests');toggleSidebar();">🔄 Profile Requests</a>
-      <a href="#" class="sidebar-link" data-tab="tab-suggestions" onclick="switchTab('tab-suggestions');toggleSidebar();">💡 App Suggestions</a>
+      <a href="#" class="sidebar-link" data-tab="tab-requests" onclick="switchTab('tab-requests');toggleSidebar();">🔄 CNIC Requests</a>
       <a href="#" class="sidebar-link" data-tab="tab-reports" onclick="switchTab('tab-reports');toggleSidebar();">⚠️ Spam / Reports</a>
       <div class="sidebar-section-title">Server & Billing</div>
       <a href="#" class="sidebar-link" data-tab="tab-server" onclick="switchTab('tab-server');toggleSidebar();">
-        🖥️ Server Bills & Usage
+        🖥️ Server Fees & Usage
         <span class="menu-badge" id="serverNewBadge" style="display:none;">NEW</span>
       </a>
+      <div class="sidebar-section-title">Account</div>
+      <a href="#" class="sidebar-link" data-tab="tab-password" onclick="switchTab('tab-password');toggleSidebar();">🔑 Change Password</a>
     </div>
   </div>
 
   <main class="content" id="content">
     <div class="server-warning" id="serverWarning">
-      ⚠️ <strong>Server is currently OFF</strong> (set by automatic ).<br>
-      All actions are temporarily disabled. Please pay the bill or contact Developer.
+      ⚠️ <strong>Server is currently OFF</strong> due to unpaid server fees.<br>
+      All actions are temporarily disabled. Please pay the fees to restore full access.
     </div>
 
     <!-- DASHBOARD -->
@@ -239,7 +261,8 @@ body.server-off .server-warning{display:block;}
     <section class="tab-pane" id="tab-members">
       <div class="section-head"><h2>All Members</h2><span class="section-note" id="memberCount">0 members</span></div>
       <div class="action-bar">
-        <button class="btn-gold" id="exportPdfBtn" onclick="exportMembersPDF()">📄 Export All to PDF</button>
+        <button class="btn-gold" onclick="exportAllText()">⬇ All Text</button>
+        <button class="btn-outline" onclick="printAllMembers()">🖨 Print All</button>
         <button class="btn-outline" onclick="loadMembers()">↻ Refresh</button>
       </div>
       <input type="text" class="search-box" id="memberSearch" placeholder="Search by name, CNIC, phone, city..." oninput="filterMembers()">
@@ -328,16 +351,9 @@ body.server-off .server-warning{display:block;}
 
     <!-- REQUESTS -->
     <section class="tab-pane" id="tab-requests">
-      <div class="section-head"><h2>Profile Change Requests</h2><span class="section-note">Approve Phone/CNIC updates</span></div>
+      <div class="section-head"><h2>CNIC Change Requests</h2><span class="section-note">Only new CNIC requests with ID image</span></div>
       <div class="action-bar"><button class="btn-outline" onclick="loadRequests()">↻ Refresh</button></div>
       <div id="requestsList"></div>
-    </section>
-
-    <!-- SUGGESTIONS -->
-    <section class="tab-pane" id="tab-suggestions">
-      <div class="section-head"><h2>App Suggestions</h2><span class="section-note">Suggestions submitted by users</span></div>
-      <div class="action-bar"><button class="btn-outline" onclick="loadSuggestions()">↻ Refresh</button></div>
-      <div id="suggestionsList"></div>
     </section>
 
     <!-- REPORTS -->
@@ -347,17 +363,17 @@ body.server-off .server-warning{display:block;}
       <div id="reportsList"></div>
     </section>
 
-    <!-- SERVER BILLS -->
+    <!-- SERVER FEES -->
     <section class="tab-pane" id="tab-server">
-      <div class="section-head"><h2>Server Bills & Usage</h2><span class="section-note">Controlled by MrCrazy Ai</span></div>
+      <div class="section-head"><h2>Server Fees & Usage</h2><span class="section-note">Billing & access status</span></div>
       <div class="server-card" id="serverInfoCard">
         <div style="text-align:center;margin-bottom:14px;">
           <div style="font-size:13px;color:var(--ink-soft);margin-bottom:4px;">Current Server Status</div>
           <div id="serverStatusText" class="server-status-on" style="font-size:20px;">● ONLINE</div>
         </div>
         <div class="server-row"><span class="server-label">Server Usage</span><span class="server-value" id="serverUsage">—</span></div>
-        <div class="server-row"><span class="server-label">Bill Amount</span><span class="server-value" id="serverBill">—</span></div>
-        <div class="server-row"><span class="server-label">Bill Date</span><span class="server-value" id="serverDate">—</span></div>
+        <div class="server-row"><span class="server-label">Fees Amount</span><span class="server-value" id="serverBill">—</span></div>
+        <div class="server-row"><span class="server-label">Billing Date</span><span class="server-value" id="serverDate">—</span></div>
         <div class="server-row">
           <span class="server-label">Project ID</span>
           <span class="server-value" style="display:flex;align-items:center;gap:8px;">
@@ -366,14 +382,72 @@ body.server-off .server-warning{display:block;}
           </span>
         </div>
       </div>
+      <div id="billAlertBox" style="display:none;background:#fce4ec;border:2px solid var(--brick);border-radius:12px;padding:12px 14px;margin-bottom:12px;">
+        <div style="font-weight:800;color:var(--brick);font-size:14px;">⚠ Payment Required</div>
+        <div style="font-size:12.5px;color:var(--ink);margin-top:4px;line-height:1.45;" id="billAlertText">Server is offline. Please pay the bill to restore full access.</div>
+      </div>
+      <div id="dueDateRow" class="server-row" style="display:none;">
+        <span class="server-label">Your Due Date</span>
+        <span class="server-value" id="serverDueDate" style="color:var(--brick);font-weight:800;">—</span>
+      </div>
       <button class="btn-gold btn-paynow" id="payNowBtn" style="width:100%;padding:14px;font-size:15px;margin-top:6px;" onclick="openPayNow()">💳 Pay Now</button>
-      <div class="card" style="margin-top:16px;background:var(--sand);">
-        <p style="font-size:12.5px;line-height:1.55;margin:0;color:var(--ink-soft);">
-          <strong>Note:</strong> Server Fee Disclaimer: Yeh bill sirf Server Usage Statistics / Hosting Charges ko cover karne ke liye hai jo Google Cloud/Services ko pay kiye jaate hain. Aap ke ta'awun ka shukriya!<strong></strong> MUHAMMAD NAEEM.
-        </p>
+      <button class="btn-outline btn-paynow" id="installmentBtn" style="width:100%;padding:12px;font-size:14px;margin-top:8px;border-color:var(--gold);color:var(--emerald-dark);font-weight:700;" onclick="openInstallmentForm()">📅 Installment / Pay Later</button>
+      <div id="installmentBox" style="display:none;margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow);">
+        <h4 style="margin:0 0 10px;color:var(--emerald-dark);font-size:14px;">Schedule Payment</h4>
+        <p style="font-size:12px;color:var(--ink-soft);margin:0 0 12px;line-height:1.45;">If you cannot pay now, choose a due date (max 10 days). Panel will work until that date. After due date, access stops unless payment is completed.</p>
+        <div class="field"><span>Payment plan</span>
+          <select id="instMode" onchange="updateInstAmounts()">
+            <option value="full_later">Pay full amount later</option>
+            <option value="half">Half now · Half later</option>
+            <option value="custom">Custom split</option>
+          </select>
+        </div>
+        <div class="field"><span>Amount now (Rs)</span><input type="number" id="instNow" min="0" value="0"></div>
+        <div class="field"><span>Amount later (Rs)</span><input type="number" id="instLater" min="0" value="0"></div>
+        <div class="field"><span>Payment due date</span><input type="date" id="instDueDate"></div>
+        <button class="btn-primary btn-paynow" id="instSubmitBtn" style="width:100%;" onclick="submitInstallment()"><span class="btn-label">Confirm Installment Plan</span></button>
+      </div>
+
+      <div class="policy-card">
+        <h4>Fees · Balance Policy & Terms</h4>
+        <ul>
+          <li>Our service fees are charged <strong>monthly</strong>.</li>
+          <li>Fees cover <strong>server costs</strong> and ongoing <strong>maintenance</strong>.</li>
+          <li>Charges are also calculated based on the number of <strong>active users</strong>.</li>
+          <li>If fees are not paid on time, this Admin Panel will be <strong>temporarily disabled</strong> until payment is completed.</li>
+        </ul>
+        <div class="dev-corner">
+          <img src="https://i.ibb.co/Kc8JcYbc/Screenshot-20260801-013051.png" alt="Developer">
+          <span>Developer<br>Muhammad Naeem</span>
+        </div>
+        <div style="height:58px;"></div>
+      </div>
+
+      <div class="dev-footer">
+        <a class="dev-footer-btn" href="https://mrcrazyteamofficial-lab.github.io/Custmer/" target="_blank" rel="noopener">
+          Developed by MrCrazy Digital Company
+        </a>
+      </div>
+    </section>
+
+    <!-- CHANGE PASSWORD -->
+    <section class="tab-pane" id="tab-password">
+      <div class="section-head"><h2>Change Password</h2><span class="section-note">Update Admin 1 login password</span></div>
+      <div class="card" style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;">
+        <div class="field"><span>Current Password</span><input type="password" id="pwCurrent" placeholder="Current password"></div>
+        <div class="field"><span>New Password</span><input type="password" id="pwNew" placeholder="Min 4 characters" minlength="4"></div>
+        <div class="field"><span>Confirm New Password</span><input type="password" id="pwNew2" placeholder="Re-enter new password"></div>
+        <button class="btn-primary" id="pwSaveBtn" style="width:100%;" onclick="changeAdminPassword()"><span class="btn-label">Save New Password</span></button>
       </div>
     </section>
   </main>
+</div>
+
+<div class="loading-overlay" id="globalLoading">
+  <div class="loading-box">
+    <div class="loading-spinner"></div>
+    <div class="loading-text" id="globalLoadingText">Loading…</div>
+  </div>
 </div>
 
 <!-- MEMBER MODAL -->
@@ -393,11 +467,12 @@ body.server-off .server-warning{display:block;}
 const FIREBASE_URL = "https://website-f1e6f-default-rtdb.firebaseio.com";
 const CLOUD_NAME = "sjt8mlws";
 const UPLOAD_PRESET = "Naeem786";
-const ADMIN_PASSWORD = "123";
+const DEFAULT_ADMIN_PASSWORD = "123";
 const PAY_NOW_URL = "https://mrcrazyteamofficial-lab.github.io/Custmer/";
 
 let allMembers = [];
 let serverStatus = { status: "on" };
+let adminPasswordCache = DEFAULT_ADMIN_PASSWORD;
 
 const $ = (id) => document.getElementById(id);
 
@@ -411,10 +486,23 @@ function showToast(msg, isError){
 }
 
 function setLoading(btn, isLoading, loadingText, defaultText){
-  btn.classList.toggle("loading", isLoading);
-  btn.disabled = isLoading;
-  const label = btn.querySelector(".btn-label");
-  if(label) label.textContent = isLoading ? loadingText : defaultText;
+  if(btn){
+    btn.classList.toggle("loading", isLoading);
+    btn.disabled = isLoading;
+    const label = btn.querySelector(".btn-label");
+    if(label) label.textContent = isLoading ? loadingText : defaultText;
+  }
+  showGlobalLoading(!!isLoading, loadingText || "Please wait…");
+}
+function showGlobalLoading(show, text){
+  const el = $("globalLoading");
+  if(!el) return;
+  if(show){
+    if($("globalLoadingText")) $("globalLoadingText").textContent = text || "Loading…";
+    el.classList.add("show");
+  } else {
+    el.classList.remove("show");
+  }
 }
 
 function initials(name){
@@ -473,6 +561,13 @@ async function uploadToCloudinary(file){
 }
 
 /* AUTH */
+async function loadAdminPassword(){
+  try{
+    const data = await dbGet("admin_settings");
+    if(data && data.admin1_password) adminPasswordCache = String(data.admin1_password);
+    else adminPasswordCache = DEFAULT_ADMIN_PASSWORD;
+  }catch(e){ adminPasswordCache = DEFAULT_ADMIN_PASSWORD; }
+}
 function checkAdminSession(){
   if(sessionStorage.getItem("kip_admin") === "1"){
     $("loginScreen").style.display = "none";
@@ -480,21 +575,47 @@ function checkAdminSession(){
     initAdmin();
   }
 }
-$("adminLoginForm").addEventListener("submit", (e) => {
+$("adminLoginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  if($("adminPass").value === ADMIN_PASSWORD){
-    sessionStorage.setItem("kip_admin", "1");
-    $("loginScreen").style.display = "none";
-    $("mainApp").style.display = "flex";
-    showToast("Welcome Admin 1!");
-    initAdmin();
-  } else {
-    showToast("Wrong password", true);
+  const btn = $("adminLoginBtn");
+  setLoading(btn, true, "Checking...", "Login to Admin");
+  try{
+    await loadAdminPassword();
+    if($("adminPass").value === adminPasswordCache){
+      sessionStorage.setItem("kip_admin", "1");
+      $("loginScreen").style.display = "none";
+      $("mainApp").style.display = "flex";
+      showToast("Welcome Admin 1!");
+      initAdmin();
+    } else {
+      showToast("Wrong password", true);
+    }
+  } finally {
+    setLoading(btn, false, "", "Login to Admin");
   }
 });
 function adminLogout(){
   sessionStorage.removeItem("kip_admin");
   location.reload();
+}
+async function changeAdminPassword(){
+  const cur = ($("pwCurrent").value || "").trim();
+  const n1 = ($("pwNew").value || "").trim();
+  const n2 = ($("pwNew2").value || "").trim();
+  if(!cur || !n1 || !n2){ showToast("Fill all fields", true); return; }
+  if(n1.length < 4){ showToast("New password min 4 characters", true); return; }
+  if(n1 !== n2){ showToast("Passwords do not match", true); return; }
+  const btn = $("pwSaveBtn");
+  setLoading(btn, true, "Saving...", "Save New Password");
+  try{
+    await loadAdminPassword();
+    if(cur !== adminPasswordCache){ showToast("Current password is wrong", true); return; }
+    await dbUpdate("admin_settings", { admin1_password: n1, passwordUpdatedAt: Date.now() });
+    adminPasswordCache = n1;
+    $("pwCurrent").value = ""; $("pwNew").value = ""; $("pwNew2").value = "";
+    showToast("Password updated successfully");
+  }catch(e){ showToast("Failed to update password", true); }
+  finally{ setLoading(btn, false, "", "Save New Password"); }
 }
 
 /* NAV */
@@ -513,8 +634,8 @@ function switchTab(tabId){
   if(tabId === "tab-usage") loadUsage();
   if(tabId === "tab-accounts") loadAccountsForm();
   if(tabId === "tab-family") loadFamilyPosts();
-  if(tabId === "tab-requests") loadRequests();
-  if(tabId === "tab-suggestions") loadSuggestions();
+  if(tabId === "tab-requests") { if(!allMembers.length) loadMembers().then(() => loadRequests()); else loadRequests(); }
+  /* suggestions removed */
   if(tabId === "tab-reports") loadReports();
   if(tabId === "tab-server"){
     loadServerStatus();
@@ -523,37 +644,133 @@ function switchTab(tabId){
   }
 }
 
-/* SERVER STATUS */
+/* SERVER STATUS + INSTALLMENT */
+function todayISO(){
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function addDaysISO(n){
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function isGraceActive(data){
+  const inst = data && data.installment;
+  if(!inst || !inst.active || !inst.dueDate) return false;
+  if(inst.approved === false) return false;
+  return inst.dueDate >= todayISO();
+}
+function isScheduledOffReached(data){
+  const sch = data && data.scheduledOff;
+  if(!sch || !sch.date) return false;
+  return sch.date <= todayISO();
+}
+function isPanelLocked(data){
+  const d = data || serverStatus || {};
+  // auto-off schedule takes effect
+  if(isScheduledOffReached(d) && (d.status||"on").toLowerCase() !== "on"){
+    // if status still "on" but schedule hit, treat locked until paid
+  }
+  if(isScheduledOffReached(d) && (d.status||"on").toLowerCase() === "on" && !d.paidAfterSchedule){
+    // schedule date reached - should be locked unless admin2 turned on after
+    // only lock if status is off OR schedule reached without status on after schedule
+  }
+  const statusOff = (d.status || "on").toLowerCase() === "off" || isScheduledOffReached(d);
+  if(!statusOff) return false;
+  if(isGraceActive(d)) return false;
+  return true;
+}
+
 async function loadServerStatus(){
   try {
     const data = await dbGet("server_control");
     serverStatus = data || { status: "on", usage: "—", bill: "—", date: "—", projectId: "—" };
+    // expire installment if due date passed
+    if(serverStatus.installment && serverStatus.installment.active && serverStatus.installment.dueDate < todayISO()){
+      serverStatus.installment.active = false;
+      serverStatus.installment.expired = true;
+      try{ await dbUpdate("server_control", { installment: serverStatus.installment, status: "off", updatedAt: Date.now() }); }catch(e){}
+      serverStatus.status = "off";
+    }
+    // auto apply scheduled off
+    if(isScheduledOffReached(serverStatus) && (serverStatus.status||"on").toLowerCase() === "on"){
+      // only auto-off if schedule exists and status not manually kept - Admin2 sets schedule; when date hits, force off
+      if(!serverStatus.scheduleAcknowledged){
+        serverStatus.status = "off";
+        try{ await dbUpdate("server_control", { status: "off", updatedAt: Date.now() }); }catch(e){}
+      }
+    }
   } catch(e){
     serverStatus = { status: "on" };
   }
   applyServerStatus();
 }
 function applyServerStatus(){
-  const isOff = (serverStatus.status || "on").toLowerCase() === "off";
-  document.body.classList.toggle("server-off", isOff);
+  const locked = isPanelLocked(serverStatus);
+  document.body.classList.toggle("server-off", locked);
 
   const statusEl = $("serverStatusText");
   if(statusEl){
-    statusEl.textContent = isOff ? "● OFFLINE" : "● ONLINE";
-    statusEl.className = isOff ? "server-status-off" : "server-status-on";
+    if(isGraceActive(serverStatus)){
+      statusEl.textContent = "● GRACE (Installment)";
+      statusEl.className = "server-status-on";
+    } else if(locked){
+      statusEl.textContent = "● OFFLINE — PAYMENT DUE";
+      statusEl.className = "server-status-off";
+    } else {
+      statusEl.textContent = "● ONLINE";
+      statusEl.className = "server-status-on";
+    }
   }
   if($("serverUsage")) $("serverUsage").textContent = serverStatus.usage || "—";
   if($("serverBill")) $("serverBill").textContent = serverStatus.bill ? ("Rs " + Number(serverStatus.bill).toLocaleString()) : "—";
   if($("serverDate")) $("serverDate").textContent = serverStatus.date || "—";
   if($("serverProjectId")) $("serverProjectId").textContent = serverStatus.projectId || "—";
 
-  const badge = $("serverNewBadge");
-  if(isOff){
-    const lastSeen = Number(localStorage.getItem("kip_server_seen") || 0);
-    if((serverStatus.updatedAt || 0) > lastSeen) badge.style.display = "flex";
+  // Due date row
+  const dueRow = $("dueDateRow");
+  if(serverStatus.installment && serverStatus.installment.dueDate){
+    dueRow.style.display = "flex";
+    $("serverDueDate").textContent = serverStatus.installment.dueDate + (serverStatus.installment.expired ? " (Expired)" : "");
   } else {
-    badge.style.display = "none";
+    dueRow.style.display = "none";
   }
+
+  // Bill alert
+  const alert = $("billAlertBox");
+  if(locked || (serverStatus.status||"").toLowerCase()==="off"){
+    alert.style.display = "block";
+    let msg = "Server access is limited. Please pay the bill to restore full panel access.";
+    if(serverStatus.bill) msg += " Amount: Rs " + Number(serverStatus.bill).toLocaleString() + ".";
+    if(isGraceActive(serverStatus)) msg = "Installment active. Pay by " + serverStatus.installment.dueDate + " or access will stop again.";
+    if(serverStatus.installment && serverStatus.installment.expired) msg = "Installment due date passed. Pay now — installment option is no longer available for this cycle.";
+    $("billAlertText").textContent = msg;
+  } else {
+    alert.style.display = "none";
+  }
+
+  // NEW badge on sidebar + keep dots while unpaid
+  const badge = $("serverNewBadge");
+  const needsPay = locked || (serverStatus.status||"").toLowerCase()==="off" || isGraceActive(serverStatus);
+  if(needsPay){
+    badge.style.display = "flex";
+    badge.textContent = locked ? "PAY" : "DUE";
+  } else {
+    const lastSeen = Number(localStorage.getItem("kip_server_seen") || 0);
+    if((serverStatus.updatedAt || 0) > lastSeen) {
+      badge.style.display = "flex";
+      badge.textContent = "NEW";
+    } else badge.style.display = "none";
+  }
+
+  // Installment button: only when offline and not already used/expired without grace
+  const instBtn = $("installmentBtn");
+  if(instBtn){
+    const canInst = (serverStatus.status||"").toLowerCase()==="off"
+      && !(serverStatus.installment && (serverStatus.installment.active || serverStatus.installment.expired));
+    instBtn.style.display = canInst ? "block" : "none";
+  }
+  if($("installmentBox")) $("installmentBox").style.display = "none";
 }
 function copyProjectId(){
   const id = $("serverProjectId").textContent;
@@ -561,6 +778,59 @@ function copyProjectId(){
   navigator.clipboard.writeText(id).then(() => showToast("Project ID copied!")).catch(() => showToast("Copy failed", true));
 }
 function openPayNow(){ window.open(PAY_NOW_URL, "_blank"); }
+
+function openInstallmentForm(){
+  const box = $("installmentBox");
+  box.style.display = box.style.display === "none" ? "block" : "none";
+  const bill = Number(serverStatus.bill || 0);
+  $("instMode").value = "full_later";
+  $("instNow").value = 0;
+  $("instLater").value = bill || 0;
+  $("instDueDate").min = todayISO();
+  $("instDueDate").max = addDaysISO(10);
+  $("instDueDate").value = addDaysISO(7);
+}
+function updateInstAmounts(){
+  const bill = Number(serverStatus.bill || 0);
+  const mode = $("instMode").value;
+  if(mode === "full_later"){ $("instNow").value = 0; $("instLater").value = bill; }
+  else if(mode === "half"){ $("instNow").value = Math.floor(bill/2); $("instLater").value = bill - Math.floor(bill/2); }
+}
+async function submitInstallment(){
+  const due = $("instDueDate").value;
+  if(!due){ showToast("Select due date", true); return; }
+  if(due < todayISO() || due > addDaysISO(10)){ showToast("Due date must be within 10 days", true); return; }
+  const amountNow = Number($("instNow").value || 0);
+  const amountLater = Number($("instLater").value || 0);
+  const btn = $("instSubmitBtn");
+  setLoading(btn, true, "Saving...", "Confirm Installment Plan");
+  try{
+    const current = await dbGet("server_control") || {};
+    if(current.installment && (current.installment.active || current.installment.expired)){
+      showToast("Installment already used for this cycle", true);
+      return;
+    }
+    const installment = {
+      active: true,
+      expired: false,
+      dueDate: due,
+      amountNow,
+      amountLater,
+      mode: $("instMode").value,
+      requestedAt: Date.now(),
+      approved: null
+    };
+    await dbSet("server_control", {
+      ...current,
+      installment,
+      updatedAt: Date.now()
+    });
+    serverStatus = { ...current, installment };
+    showToast("Installment set — panel unlocked until " + due);
+    applyServerStatus();
+  }catch(e){ showToast("Failed", true); }
+  finally{ setLoading(btn, false, "", "Confirm Installment Plan"); }
+}
 
 /* DASHBOARD */
 async function loadDashboard(){
@@ -595,7 +865,10 @@ async function loadMembers(){
 function renderMembers(arr){
   const list = $("membersList");
   if(!arr.length){ list.innerHTML = `<div class="empty-state">No members found.</div>`; return; }
-  list.innerHTML = arr.map(m => `
+  list.innerHTML = arr.map(m => {
+    const fc = Object.keys(m.followers||{}).length;
+    const fg = Object.keys(m.following||{}).length;
+    return `
     <div class="member-card ${m.pinned ? 'pinned' : ''}">
       ${m.pinned ? '<div class="pin-badge">📌 Pinned</div>' : ''}
       <div class="member-top">
@@ -604,15 +877,16 @@ function renderMembers(arr){
           <div class="member-name">${escapeHtml(m.name || "—")}</div>
           <div class="member-role">${escapeHtml(m.category || "General Member")}</div>
           <div class="member-meta">${escapeHtml(m.phone || "")} · ${escapeHtml(timeAgo(m.timestamp))}</div>
+          <div class="member-meta" style="margin-top:2px;">👥 ${fc} followers · ${fg} following</div>
         </div>
       </div>
       <div class="member-actions">
         <button class="btn-outline" onclick="viewMember('${m.id}')">View Full Details</button>
+        <button class="btn-gold" style="padding:8px 10px;font-size:12px;" onclick="downloadUserText('${m.id}')">⬇ Text</button>
         <button class="btn-outline" onclick="togglePin('${m.id}', ${!!m.pinned})">${m.pinned ? "Unpin" : "Pin"}</button>
-        <button class="btn-danger" onclick="deleteMember('${m.id}', '${escapeHtml(m.name)}')">Delete</button>
       </div>
-    </div>
-  `).join("");
+    </div>`;
+  }).join("");
 }
 function filterMembers(){
   const q = $("memberSearch").value.toLowerCase().trim();
@@ -638,6 +912,7 @@ function viewMember(id){
       <div class="detail-item"><div class="detail-label">Father / Husband</div><div class="detail-value">${escapeHtml(m.fatherName || "—")}</div></div>
       <div class="detail-item"><div class="detail-label">Date of Birth</div><div class="detail-value">${escapeHtml(formatDate(m.dob))}</div></div>
       <div class="detail-item"><div class="detail-label">Gender</div><div class="detail-value">${escapeHtml(m.gender || "—")}</div></div>
+      <div class="detail-item"><div class="detail-label">Blood Group</div><div class="detail-value">${escapeHtml(m.bloodGroup || "—")}</div></div>
       <div class="detail-item"><div class="detail-label">CNIC</div><div class="detail-value mono">${escapeHtml(m.cnic || "—")}</div></div>
       <div class="detail-item"><div class="detail-label">Passport</div><div class="detail-value">${escapeHtml(m.passport || "—")}</div></div>
       <div class="detail-item"><div class="detail-label">Mobile</div><div class="detail-value">${escapeHtml(m.phone || "—")}</div></div>
@@ -649,17 +924,35 @@ function viewMember(id){
       <div class="detail-item full"><div class="detail-label">Permanent Address</div><div class="detail-value">${escapeHtml(m.permanentAddress || "—")}</div></div>
       <div class="detail-item"><div class="detail-label">Qualification</div><div class="detail-value">${escapeHtml(m.qualification || "—")}</div></div>
       <div class="detail-item"><div class="detail-label">Profession</div><div class="detail-value">${escapeHtml(m.profession || "—")}</div></div>
+      <div class="detail-item"><div class="detail-label">Occupation</div><div class="detail-value">${escapeHtml(m.occupation || "—")}</div></div>
       <div class="detail-item full"><div class="detail-label">Organization</div><div class="detail-value">${escapeHtml(m.organization || "—")}</div></div>
+      <div class="detail-item full"><div class="detail-label">Bio</div><div class="detail-value">${escapeHtml(m.bio || "—")}</div></div>
       <div class="detail-item"><div class="detail-label">Membership Type</div><div class="detail-value">${escapeHtml(m.membershipType || "—")}</div></div>
       <div class="detail-item"><div class="detail-label">Joined</div><div class="detail-value">${escapeHtml(timeAgo(m.timestamp))}</div></div>
+      <div class="detail-item"><div class="detail-label">Total Followers</div><div class="detail-value" style="font-weight:800;color:var(--emerald);">${Object.keys(m.followers||{}).length}</div></div>
+      <div class="detail-item"><div class="detail-label">Total Following</div><div class="detail-value" style="font-weight:800;color:var(--emerald);">${Object.keys(m.following||{}).length}</div></div>
       <div class="detail-item full" style="background:#fff3cd;border:1px solid #ffc107;">
         <div class="detail-label">Password (Admin Only)</div>
         <div class="detail-value mono" style="font-size:14px;font-weight:700;">${escapeHtml(m.password || "—")}</div>
       </div>
     </div>
-    <div style="margin-top:16px;display:flex;gap:8px;">
-      <button class="btn-outline" style="flex:1;" onclick="togglePin('${m.id}', ${!!m.pinned});closeMemberModal();">${m.pinned ? "Unpin" : "Pin Member"}</button>
-      <button class="btn-danger" style="flex:1;" onclick="deleteMember('${m.id}', '${escapeHtml(m.name)}');closeMemberModal();">Delete</button>
+    <div style="margin-top:14px;">
+      <div style="font-size:12px;font-weight:800;color:var(--emerald-dark);margin-bottom:6px;">Followers (${Object.keys(m.followers||{}).length})</div>
+      ${Object.keys(m.followers||{}).length
+        ? Object.entries(m.followers).map(([fid,f]) => `<div style="font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--line);">${escapeHtml(f.name||fid)}</div>`).join("")
+        : `<div style="font-size:12px;color:var(--ink-soft);">No followers</div>`}
+    </div>
+    <div style="margin-top:14px;">
+      <div style="font-size:12px;font-weight:800;color:var(--emerald-dark);margin-bottom:6px;">Following (${Object.keys(m.following||{}).length})</div>
+      ${Object.keys(m.following||{}).length
+        ? Object.entries(m.following).map(([fid,f]) => `<div style="font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--line);">${escapeHtml(f.name||fid)}</div>`).join("")
+        : `<div style="font-size:12px;color:var(--ink-soft);">Not following anyone</div>`}
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn-gold" style="flex:1;min-width:100px;" onclick="downloadUserText('${m.id}')">⬇ Text</button>
+      <button class="btn-outline" style="flex:1;min-width:100px;" onclick="printUser('${m.id}')">🖨 Print</button>
+      <button class="btn-outline" style="flex:1;min-width:100px;" onclick="togglePin('${m.id}', ${!!m.pinned});closeMemberModal();">${m.pinned ? "Unpin" : "Pin"}</button>
+      <button class="btn-danger" style="flex:1;min-width:100px;" onclick="safeDeleteMember('${m.id}', '${escapeHtml(m.name)}')">🗑 Delete User</button>
     </div>
   `;
   $("memberModal").classList.add("open");
@@ -682,82 +975,111 @@ async function deleteMember(id, name){
   } catch(e){ showToast("Delete failed", true); }
 }
 
-/* PDF EXPORT - 1 user per page */
-function exportMembersPDF(){
-  if(!allMembers.length){ showToast("No members to export", true); return; }
-  const btn = $("exportPdfBtn");
-  btn.disabled = true;
-  btn.textContent = "⏳ Generating PDF...";
-  showToast("PDF generate ho raha hai, thoda wait karein...");
+/* Text + Print export (no PDF) */
+function memberToText(m, index){
+  const fc = Object.keys(m.followers||{}).length;
+  const fg = Object.keys(m.following||{}).length;
+  const lines = [
+    index ? `===== MEMBER ${index} =====` : "===== MEMBER RECORD =====",
+    `Name: ${m.name || "—"}`,
+    `Category: ${m.category || "—"}`,
+    `Father/Husband: ${m.fatherName || "—"}`,
+    `Date of Birth: ${formatDate(m.dob)}`,
+    `Gender: ${m.gender || "—"}`,
+    `Blood Group: ${m.bloodGroup || "—"}`,
+    `CNIC: ${m.cnic || "—"}`,
+    `Passport: ${m.passport || "—"}`,
+    `Mobile: ${m.phone || "—"}`,
+    `WhatsApp: ${m.whatsapp || "—"}`,
+    `Email: ${m.email || "—"}`,
+    `Tehsil: ${m.tehsil || "—"}`,
+    `Marital Status: ${m.maritalStatus || "—"}`,
+    `Qualification: ${m.qualification || "—"}`,
+    `Profession: ${m.profession || "—"}`,
+    `Occupation: ${m.occupation || "—"}`,
+    `Organization: ${m.organization || "—"}`,
+    `Current Address: ${m.currentAddress || "—"}`,
+    `Permanent Address: ${m.permanentAddress || "—"}`,
+    `Membership Type: ${m.membershipType || "—"}`,
+    `Bio: ${m.bio || "—"}`,
+    `Followers: ${fc}`,
+    `Following: ${fg}`,
+    `Password: ${m.password || "—"}`,
+    `Joined: ${m.timestamp ? new Date(m.timestamp).toLocaleString("en-PK") : "—"}`,
+    ""
+  ];
+  return lines.join("\n");
+}
 
-  setTimeout(() => {
-    try {
-      const container = $("pdfContainer");
-      const now = new Date().toLocaleString("en-PK");
-      let html = "";
-      allMembers.forEach((m, i) => {
-        html += `
-          <div class="pdf-page">
-            <div class="pdf-header">
-              <div class="pdf-title">Khichi Ittihad Pakistan – Member Record</div>
-              <div class="pdf-sub">Generated: ${now} · Member ${i+1} of ${allMembers.length}</div>
-            </div>
-            <div class="pdf-name">${i+1}. ${escapeHtml(m.name || "—")} ${m.pinned ? "(Pinned)" : ""}</div>
-            <div class="pdf-grid">
-              <div class="pdf-item"><b>Category:</b> ${escapeHtml(m.category || "—")}</div>
-              <div class="pdf-item"><b>Father/Husband:</b> ${escapeHtml(m.fatherName || "—")}</div>
-              <div class="pdf-item"><b>Date of Birth:</b> ${escapeHtml(formatDate(m.dob))}</div>
-              <div class="pdf-item"><b>Gender:</b> ${escapeHtml(m.gender || "—")}</div>
-              <div class="pdf-item"><b>CNIC:</b> ${escapeHtml(m.cnic || "—")}</div>
-              <div class="pdf-item"><b>Mobile:</b> ${escapeHtml(m.phone || "—")}</div>
-              <div class="pdf-item"><b>WhatsApp:</b> ${escapeHtml(m.whatsapp || "—")}</div>
-              <div class="pdf-item"><b>Email:</b> ${escapeHtml(m.email || "—")}</div>
-              <div class="pdf-item"><b>Tehsil:</b> ${escapeHtml(m.tehsil || "—")}</div>
-              <div class="pdf-item"><b>Marital Status:</b> ${escapeHtml(m.maritalStatus || "—")}</div>
-              <div class="pdf-item"><b>Qualification:</b> ${escapeHtml(m.qualification || "—")}</div>
-              <div class="pdf-item"><b>Profession:</b> ${escapeHtml(m.profession || "—")}</div>
-              <div class="pdf-item pdf-full"><b>Current Address:</b> ${escapeHtml(m.currentAddress || "—")}</div>
-              <div class="pdf-item pdf-full"><b>Permanent Address:</b> ${escapeHtml(m.permanentAddress || "—")}</div>
-              <div class="pdf-item pdf-full"><b>Organization:</b> ${escapeHtml(m.organization || "—")}</div>
-              <div class="pdf-item"><b>Membership Type:</b> ${escapeHtml(m.membershipType || "—")}</div>
-              <div class="pdf-item"><b>Joined:</b> ${escapeHtml(timeAgo(m.timestamp))}</div>
-              <div class="pdf-item pdf-full" style="background:#fff8e1;padding:6px;border-radius:4px;"><b>Password:</b> ${escapeHtml(m.password || "—")}</div>
-            </div>
-          </div>`;
-      });
-      container.innerHTML = html;
-      const opt = {
-        margin: 0,
-        filename: `Khichi-Ittihad-Members-${Date.now()}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        pagebreak: { mode: ["css", "legacy"] }
-      };
-      html2pdf().set(opt).from(container).save().then(() => {
-        showToast("PDF downloaded successfully!");
-        container.innerHTML = "";
-        btn.disabled = false;
-        btn.textContent = "📄 Export All to PDF";
-      }).catch(err => {
-        console.error(err);
-        showToast("PDF generation failed", true);
-        btn.disabled = false;
-        btn.textContent = "📄 Export All to PDF";
-      });
-    } catch(err){
-      console.error(err);
-      showToast("PDF generation failed", true);
-      btn.disabled = false;
-      btn.textContent = "📄 Export All to PDF";
-    }
-  }, 300);
+function downloadTextFile(content, filename){
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+}
+
+function downloadUserText(id){
+  const m = allMembers.find(x => x.id === id);
+  if(!m){ showToast("Member not found", true); return; }
+  const safe = (m.name || "member").replace(/[^\w\-]+/g, "_").slice(0, 40);
+  downloadTextFile(memberToText(m, 1), `KIP-${safe}-${Date.now()}.txt`);
+  showToast("Text downloaded");
+}
+
+function exportAllText(){
+  if(!allMembers.length){ showToast("No members", true); return; }
+  const header = `Khichi Ittihad Pakistan — All Members\nExported: ${new Date().toLocaleString("en-PK")}\nTotal: ${allMembers.length}\n\n`;
+  const body = allMembers.map((m, i) => memberToText(m, i+1)).join("\n");
+  downloadTextFile(header + body, `KIP-All-Members-${Date.now()}.txt`);
+  showToast("All members text downloaded");
+}
+
+function printTextContent(title, text){
+  const w = window.open("", "_blank");
+  if(!w){ showToast("Allow popups to print", true); return; }
+  const safeTitle = String(title).replace(/</g, "&lt;");
+  const safeText = String(text).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  const html = "<!DOCTYPE html><html><head><title>" + safeTitle + "</title>" +
+    "<style>body{font-family:Arial,sans-serif;padding:24px;line-height:1.55;color:#111;font-size:13px;}" +
+    "h1{font-size:18px;color:#0B4F3C;margin:0 0 12px;} pre{white-space:pre-wrap;font-family:inherit;}</style></head>" +
+    "<body><h1>" + safeTitle + "</h1><pre>" + safeText + "</pre>" +
+    "<scr" + "ipt>window.onload=function(){window.print();}</scr" + "ipt></body></html>";
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+}
+
+function printUser(id){
+  const m = allMembers.find(x => x.id === id);
+  if(!m){ showToast("Member not found", true); return; }
+  printTextContent("Member Record — " + (m.name||""), memberToText(m, 1));
+}
+
+function printAllMembers(){
+  if(!allMembers.length){ showToast("No members", true); return; }
+  const body = allMembers.map((m, i) => memberToText(m, i+1)).join("\n");
+  printTextContent("All Members — Khichi Ittihad Pakistan", `Total: ${allMembers.length}\n\n` + body);
+}
+
+async function safeDeleteMember(id, name){
+  if(!confirm(`Safe delete user "${name}"?\n\nThis permanently removes the member from the database.`)) return;
+  if(!confirm(`Final confirmation: Delete "${name}" forever?`)) return;
+  try {
+    await dbDelete(`members/${id}`);
+    showToast("User deleted safely");
+    closeMemberModal();
+    loadMembers();
+    loadDashboard();
+  } catch(e){ showToast("Delete failed", true); }
 }
 
 /* ANNOUNCEMENTS */
 wireUploadBox("annUploadBox", "annFileInput", "annUploadText");
 
-$("announcementForm").addEventListener("submit", async (e) => {
+$("announcementForm")?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const btn = $("annSubmitBtn");
   setLoading(btn, true, "Posting...", "Post Announcement");
@@ -838,7 +1160,7 @@ async function deleteOnline(id){
 }
 
 /* OFFLINE */
-$("offlineForm").addEventListener("submit", async (e) => {
+$("offlineForm")?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const btn = $("offSubmitBtn");
   setLoading(btn, true, "Saving...", "Add Offline Donation");
@@ -874,7 +1196,7 @@ async function deleteOffline(id){
 
 /* USAGE */
 wireUploadBox("useUploadBox", "useFileInput", "useUploadText");
-$("usageForm").addEventListener("submit", async (e) => {
+$("usageForm")?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const btn = $("useSubmitBtn");
   setLoading(btn, true, "Saving...", "Add Expense Record");
@@ -933,7 +1255,7 @@ async function loadAccountsForm(){
     $("accBankDesc").value = data.bank?.description || "";
   } catch(e){}
 }
-$("accountsForm").addEventListener("submit", async (e) => {
+$("accountsForm")?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const btn = $("accSubmitBtn");
   setLoading(btn, true, "Saving...", "Save All Accounts");
@@ -955,17 +1277,21 @@ async function loadFamilyPosts(){
     const data = await dbGet("family_posts");
     const entries = Object.entries(data || {}).map(([id,v]) => ({id,...v})).sort((a,b) => b.timestamp - a.timestamp);
     if(!entries.length){ list.innerHTML = `<div class="empty-state">No family posts yet.</div>`; return; }
-    list.innerHTML = entries.map(p => `
+    list.innerHTML = entries.map(p => {
+      const likes = (p.likes||0) + (p.loves||0);
+      return `
       <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-          <div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <div style="flex:1;min-width:0;">
             <div style="font-weight:700;font-size:13.5px;">${escapeHtml(p.name)}</div>
-            <div style="font-size:11px;color:var(--ink-soft);margin:2px 0 6px;">${timeAgo(p.timestamp)} · ♥ ${p.likes||0}</div>
-            <div style="font-size:13px;line-height:1.45;">${escapeHtml(p.text)}</div>
+            <div style="font-size:11px;color:var(--ink-soft);margin:2px 0 6px;">${timeAgo(p.timestamp)} · ♥ ${likes}</div>
+            <div style="font-size:13px;line-height:1.45;">${escapeHtml(p.text||"")}</div>
+            ${p.imageUrl ? `<img src="${escapeHtml(p.imageUrl)}" style="max-width:100%;max-height:180px;object-fit:contain;border-radius:10px;margin-top:8px;background:var(--sand);cursor:pointer;border:1px solid var(--line);" onclick="openImg('${escapeHtml(p.imageUrl)}')">` : ""}
           </div>
           <button class="btn-danger" onclick="deleteFamily('${p.id}')">Delete</button>
         </div>
-      </div>`).join("");
+      </div>`;
+    }).join("");
   } catch(e){ list.innerHTML = `<div class="empty-state">Load failed.</div>`; }
 }
 async function deleteFamily(id, silent){
@@ -977,74 +1303,60 @@ async function deleteFamily(id, silent){
 /* REQUESTS */
 function loadRequests(){
   const list = $("requestsList");
-  const reqs = allMembers.filter(m => m.pendingChange);
-  if(!reqs.length){ list.innerHTML = `<div class="empty-state">No pending requests at the moment.</div>`; return; }
-  list.innerHTML = reqs.map(m => `
+  // Only CNIC change requests (new flow with ID card image)
+  const reqs = allMembers.filter(m => {
+    if(!m.pendingChange) return false;
+    const t = (m.pendingChange.type || "").toLowerCase();
+    return t.includes("cnic") || !!m.pendingChange.cnicImageUrl;
+  });
+  if(!reqs.length){ list.innerHTML = `<div class="empty-state">No new CNIC requests.</div>`; return; }
+  list.innerHTML = reqs.map(m => {
+    const pc = m.pendingChange || {};
+    return `
     <div class="card">
       <div style="font-weight:700;margin-bottom:4px;color:var(--emerald-dark);">${escapeHtml(m.name)}</div>
       <div style="font-size:12.5px;color:var(--ink);margin-bottom:10px;line-height:1.5;">
-        <span style="color:var(--ink-soft);font-size:11px;">CURRENT DATA:</span><br>
-        <strong>Phone:</strong> ${escapeHtml(m.phone)} &nbsp;|&nbsp; <strong>CNIC:</strong> ${escapeHtml(m.cnic)}<br><br>
-        <span style="color:var(--gold);font-size:11px;font-weight:800;">REQUESTED UPDATE:</span><br>
-        <strong>${escapeHtml(m.pendingChange.value)}</strong>
+        <span style="color:var(--ink-soft);font-size:11px;">CURRENT CNIC:</span><br>
+        <strong class="mono">${escapeHtml(m.cnic || "—")}</strong><br><br>
+        <span style="color:var(--gold);font-size:11px;font-weight:800;">CNIC CHANGE REQUEST</span><br>
+        <div style="font-size:12px;margin-top:4px;">${escapeHtml(pc.value || "CNIC change requested")}</div>
+        <div style="font-size:11px;color:var(--ink-soft);margin-top:4px;">Requested: ${pc.requestedAt ? new Date(pc.requestedAt).toLocaleString("en-PK") : "—"}</div>
+      </div>
+      ${pc.cnicImageUrl ? `
+        <div style="margin-bottom:12px;">
+          <div style="font-size:11px;font-weight:700;color:var(--ink-soft);margin-bottom:6px;">ORIGINAL CNIC IMAGE</div>
+          <img src="${escapeHtml(pc.cnicImageUrl)}" style="max-width:100%;max-height:200px;border-radius:10px;border:1px solid var(--line);object-fit:contain;background:var(--sand);cursor:pointer;" onclick="openImg('${escapeHtml(pc.cnicImageUrl)}')">
+        </div>` : `<div style="font-size:12px;color:var(--brick);margin-bottom:10px;">No CNIC image attached.</div>`}
+      <div class="field"><span>New CNIC (enter after verifying image)</span>
+        <input type="text" id="cnicNew-${m.id}" placeholder="e.g. 42101-1234567-1" value="">
       </div>
       <div style="display:flex;gap:8px;">
-        <button class="btn-primary" style="padding:8px;font-size:12px;flex:1;" onclick="approveRequest('${m.id}', '${escapeHtml(m.pendingChange.value)}')">Approve</button>
+        <button class="btn-primary" style="padding:8px;font-size:12px;flex:1;" onclick="approveCnicRequest('${m.id}')">Approve CNIC</button>
         <button class="btn-danger" style="padding:8px;font-size:12px;flex:1;" onclick="rejectRequest('${m.id}')">Reject</button>
       </div>
-    </div>`).join("");
+    </div>`;
+  }).join("");
 }
-async function approveRequest(id, valStr){
-  if(!confirm("Approve and apply these changes?")) return;
-  const phoneMatch = valStr.match(/Phone:\s*([^|]+)/);
-  const cnicMatch = valStr.match(/CNIC:\s*(.+)/);
-  const newPhone = phoneMatch ? phoneMatch[1].trim() : "";
-  const newCnic = cnicMatch ? cnicMatch[1].trim() : "";
+async function approveCnicRequest(id){
+  const input = $("cnicNew-"+id);
+  const newCnic = input ? input.value.trim() : "";
+  if(!newCnic){ showToast("Enter verified new CNIC number", true); return; }
+  if(!confirm("Approve CNIC change to: " + newCnic + "?")) return;
   try {
-    const updatePayload = { pendingChange: null };
-    if(newPhone) updatePayload.phone = newPhone;
-    if(newCnic) updatePayload.cnic = newCnic;
-    await dbUpdate(`members/${id}`, updatePayload);
-    showToast("Request Approved & Profile Updated");
+    await dbUpdate(`members/${id}`, { cnic: newCnic, pendingChange: null });
+    showToast("CNIC updated successfully");
     await loadMembers();
+    loadRequests();
   } catch(e){ showToast("Failed to approve", true); }
 }
 async function rejectRequest(id){
-  if(!confirm("Reject this update request?")) return;
+  if(!confirm("Reject this CNIC request?")) return;
   try {
     await dbUpdate(`members/${id}`, { pendingChange: null });
     showToast("Request Rejected");
     await loadMembers();
+    loadRequests();
   } catch(e){ showToast("Failed to reject", true); }
-}
-
-/* SUGGESTIONS */
-async function loadSuggestions(){
-  const list = $("suggestionsList");
-  try {
-    const data = await dbGet("app_suggestions");
-    const entries = Object.entries(data || {}).map(([id,v]) => ({id,...v})).sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
-    if(!entries.length){ list.innerHTML = `<div class="empty-state">No app suggestions yet.</div>`; return; }
-    list.innerHTML = entries.map(s => `
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
-          <div style="flex:1;">
-            <div style="font-weight:700;color:var(--emerald);">${escapeHtml(s.name)}</div>
-            <div style="font-size:11px;color:var(--ink-soft);margin-bottom:6px;">${escapeHtml(s.phone)} · ${timeAgo(s.timestamp)}</div>
-            <div style="font-size:13px;line-height:1.5;">${escapeHtml(s.details)}</div>
-          </div>
-          ${s.screenshotUrl ? `<img src="${escapeHtml(s.screenshotUrl)}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid var(--line);" onclick="openImg('${escapeHtml(s.screenshotUrl)}')">` : ""}
-        </div>
-        <div style="margin-top:12px;display:flex;justify-content:flex-end;">
-          <button class="btn-danger" style="padding:6px 12px;font-size:12px;" onclick="deleteSuggestion('${s.id}')">Delete Suggestion</button>
-        </div>
-      </div>`).join("");
-  } catch(e){ list.innerHTML = `<div class="empty-state">Load failed.</div>`; }
-}
-async function deleteSuggestion(id){
-  if(!confirm("Delete this suggestion?")) return;
-  try { await dbDelete(`app_suggestions/${id}`); showToast("Suggestion deleted"); loadSuggestions(); }
-  catch(e){ showToast("Failed", true); }
 }
 
 /* REPORTS */
@@ -1102,10 +1414,20 @@ function wireUploadBox(boxId, inputId, textId){
 
 /* INIT */
 function initAdmin(){
-  loadDashboard();
-  loadMembers();
-  loadServerStatus();
-  setInterval(loadServerStatus, 60000);
+  try {
+    loadDashboard();
+    loadMembers();
+    loadServerStatus();
+    loadAnnouncements();
+    loadOnlineDonations();
+    loadOfflineDonations();
+    loadUsage();
+    loadAccountsForm();
+    setInterval(loadServerStatus, 60000);
+  } catch(e) {
+    console.error(e);
+    showToast("Admin init error", true);
+  }
 }
 checkAdminSession();
 </script>
